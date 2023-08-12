@@ -51,7 +51,7 @@ void preencheGabarito(int ***tabela, int n){
 void zeraStatus(int ***tabela, int n){
     for(int i=0; i<n; i++)
         for(int j=0; j<n; j++)
-            (*tabela)[i][j] = 0;
+            (*tabela)[i][j] = -1;
 }
 
 void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
@@ -59,24 +59,24 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
     printf("\n");
 
     printf("  ");
-    for(int i=0; i<n; i++) printf("| %-3d ", i+1);
+    for(int i=0; i<n; i++) printf(TAB_VER" %-3d ", i+1);
     printf("\n");
 
     for(int i=0; i<n; i++){
         printf("%d ", i+1);
         for(int j=0; j<n; j++){
-            if((*status)[i][j] == 1) printf(GREEN("| %-3d "), (*tabela)[i][j]);
-            else if((*status)[i][j] == 0) printf(RED("| %-3d "), (*tabela)[i][j]);
-            else printf("%-3d ", (*tabela)[i][j]);
+            if((*status)[i][j] == 1) printf(TAB_VER"\x1b[32m %-3d \x1b[0m", (*tabela)[i][j]);
+            else if((*status)[i][j] == 0) printf(TAB_VER"\x1b[31m %-3d \x1b[0m", (*tabela)[i][j]);
+            else printf(TAB_VER" %-3d ", (*tabela)[i][j]);
         }
-        printf("| %d", (*dicasV)[i]);
+        printf(TAB_VER" %-3d ", (*dicasV)[i]);
 
         printf("\n");
     }
 
     printf("  ");
     for(int i=0; i<n; i++){
-        printf("| %-3d ", (*dicasH)[i]);  
+        printf(TAB_VER" %-3d ", (*dicasH)[i]);  
     }
     
     /*printf("\n");
@@ -142,8 +142,60 @@ void mudaStatus(int ***tabela, int i, int j, int operacao){
     }
 }
 
+void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n){
+    int marcados=0, removidos=0;
+    FILE *fp;
+    fp = fopen(nomearquivo, "w");
+
+    fprintf(fp, "%d\n", n);
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            fprintf(fp, "%d ", (*display)[i][j]);
+        fprintf(fp, "\n");
+    }
+
+    for(int i=0; i<n; i++) fprintf(fp,"%d ", (*dicasV)[i]);
+    fprintf(fp, "\n");
+    for(int i=0; i<n; i++) fprintf(fp, "%d ", (*dicasH)[i]);
+    fprintf(fp, "\n");
 
 
+
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            if((*status)[i][j] == 1) marcados++;
+            if((*status)[i][j] == 0) removidos++;
+        }
+            
+    }
+    fprintf(fp, "%d\n", marcados);
+
+
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            if((*status)[i][j] == 1) fprintf(fp, "%d %d\n", i, j);
+    }
+
+    fprintf(fp, "%d\n", removidos);
+
+
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            if((*status)[i][j] == 0) fprintf(fp, "%d %d\n", i, j);
+    }
+
+    fprintf(fp, "%s\n", nome);
+
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            fprintf(fp, "%d ", (*gabarito)[i][j]);
+        fprintf(fp, "\n");
+    }
+    
+
+    fclose(fp);
+
+}
 
 
 

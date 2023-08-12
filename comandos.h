@@ -1,6 +1,7 @@
 #ifndef COMANDOS_H //evita múltiplas inclusões
 #define COMANDOS_H
 
+
 int teste();
 
 void alocaMemoria(int ***matriz, int n);
@@ -26,5 +27,9 @@ void limpaBuffer();
 void mudaStatus(int ***tabela, int i, int j, int operacao);
 
 void titulo();
+
+void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n);
+
+void carregaSalvo(char nomearquivo[]);
 
 #endif //COMANDOS_H
