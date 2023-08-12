@@ -127,42 +127,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
         limpaBuffer();
         printf("\n%s, digite o comando: ", nome);
 
-        scanf("%s", comando);
-
-        auxpos=0;
-        while(c!='\n' || c!=' '){
-            c = getchar();
-            comando[auxpos] = c;
-            auxpos++;
-        }
-        c=' ';
-
-        printf("\nFLAG 1\n");
-
-        if(!strcmp(comando, "marcar") || (!strcmp(comando, "remover"))){
-            scanf("%d", &x);
-            j = x%10;
-            i = x/10;
-        }
-
-        printf("\nFLAG 2\n");
-
-        printf("\n\n%s %d %d %d", comando, x, i, j);
-
-        /*auxpos=0;
-        while(c!='\n'){
-            c = getchar();
-            leitura[auxpos] = c;
-            auxpos++;
-        }
-        c=' ';
-
-        leitura[auxpos-1] = '\0';
-
-        printf("\nCOMANDO: %s|\n", leitura);
-
-
-        //fgets(leitura, 11, stdin);
+        fgets(leitura, 11, stdin);
 
         int tam = strlen(leitura);
 
@@ -175,9 +140,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
 
         for(int j=0; j<pos; j++)
             comando[j] = leitura[j];
-        comando[pos] = '\0';*/
+        comando[pos] = '\0';
 
-        /*if(!strcmp(comando, "manter") || (!strcmp(comando, "remover"))){
+        if(!strcmp(comando, "manter") || (!strcmp(comando, "remover"))){
             for(int j=0; j<2; j++){
                 pos++;
                 num[j] = leitura[pos];
@@ -186,7 +151,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
             x = atoi(num);
             j = x%10;
             i = x/10;
-        }*/
+        }
 
 
         if(x < 11 || x>((10*n)+n)){
