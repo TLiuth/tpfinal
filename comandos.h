@@ -25,4 +25,6 @@ void limpaBuffer();
 
 void mudaStatus(int ***tabela, int i, int j, int operacao);
 
+void titulo();
+
 #endif //COMANDOS_H

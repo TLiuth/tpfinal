@@ -4,6 +4,8 @@
 #include <string.h>
 #include "comandos.h"
 #include "colorcodes.h"
+#include <time.h>
+#include <unistd.h>
 
 
 typedef struct 
@@ -19,6 +21,10 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n);
 
 int main(){
     
+    printf("\ec\e[3J");
+
+    //titulo();
+
     menu();
 
 
@@ -87,7 +93,7 @@ void inicializar(){
 
 
     operador(nome, &mz, dicasH, dicasV, n);
-
+    menu();
     /*imprime(&(mz.display), &(mz.status), n);*/
 
     liberaMatrizes(&(mz.display), n);
@@ -96,46 +102,109 @@ void inicializar(){
 
     liberaVetores(&dicasV, n);
     liberaVetores(&dicasH, n);
+    printf("\n\nMemória Liberada");
+    sleep(1);
+    exit(0);
 
 }
 
 void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
-    char comando[8];
-    int x, i, j;
+    char leitura[11], comando[9], num[3], c;
+    int x=0, i, j, pos=0, auxpos=0;
+
     
     
 
     while(1){
-        printf("\ec\e[3J");
+        //printf("\ec\e[3J");
 
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
-        imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
-        printf("\n");
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
+        printf("\n");
+        //imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+        //printf("\n");
+        //imprime(&(mz->status), &(mz->status), &dicasH, &dicasV, n);
         limpaBuffer();
         printf("\n%s, digite o comando: ", nome);
-        scanf("%s %d", comando, &x);
-        //scanf("%d", &x);
 
-        j = x%10;
-        i = x/10;
+        scanf("%s", comando);
+
+        auxpos=0;
+        while(c!='\n' || c!=' '){
+            c = getchar();
+            comando[auxpos] = c;
+            auxpos++;
+        }
+        c=' ';
+
+        printf("\nFLAG 1\n");
+
+        if(!strcmp(comando, "marcar") || (!strcmp(comando, "remover"))){
+            scanf("%d", &x);
+            j = x%10;
+            i = x/10;
+        }
+
+        printf("\nFLAG 2\n");
+
+        printf("\n\n%s %d %d %d", comando, x, i, j);
+
+        /*auxpos=0;
+        while(c!='\n'){
+            c = getchar();
+            leitura[auxpos] = c;
+            auxpos++;
+        }
+        c=' ';
+
+        leitura[auxpos-1] = '\0';
+
+        printf("\nCOMANDO: %s|\n", leitura);
+
+
+        //fgets(leitura, 11, stdin);
+
+        int tam = strlen(leitura);
+
+        for(int i=0; i<tam; i++){
+            if(leitura[i]==' '){
+                pos = i;
+                break;
+            }else pos = tam-1;
+        }
+
+        for(int j=0; j<pos; j++)
+            comando[j] = leitura[j];
+        comando[pos] = '\0';*/
+
+        /*if(!strcmp(comando, "manter") || (!strcmp(comando, "remover"))){
+            for(int j=0; j<2; j++){
+                pos++;
+                num[j] = leitura[pos];
+            }
+            num[2] = '\0';
+            x = atoi(num);
+            j = x%10;
+            i = x/10;
+        }*/
+
 
         if(x < 11 || x>((10*n)+n)){
             printf(BOLD(RED("\nPosição inválida.\n")));
             continue;
         }
-
         
+
         
         if(!strcmp(comando, "manter")){
             mudaStatus(&(mz->status), i-1, j-1, 1);
         }else if(!strcmp(comando, "remover")){
             mudaStatus(&(mz->status), i-1, j-1, 0);
         }else if(!strcmp(comando, "voltar")){
-            limpaBuffer();
+            printf("\nEntrou em voltar");
             menu();
+            return;
         }
-
     }
 
 }
@@ -151,7 +220,7 @@ void menu(){
 
     switch(op){
         case 0:
-            //salvar programa e fechar
+            return;
             exit(0);
         case 1:
             inicializar();

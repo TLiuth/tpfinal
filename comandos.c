@@ -4,7 +4,7 @@
 #include <time.h>
 #include "colorcodes.h"
 #include <string.h>
-
+#include <unistd.h>
 
 int teste(){
     printf("Testando comando\n");
@@ -59,24 +59,24 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
     printf("\n");
 
     printf("  ");
-    for(int i=0; i<n; i++) printf("%-3d |", i+1);
+    for(int i=0; i<n; i++) printf("| %-3d ", i+1);
     printf("\n");
 
     for(int i=0; i<n; i++){
         printf("%d ", i+1);
         for(int j=0; j<n; j++){
-            if((*status)[i][j] == 1) printf(GREEN("%-3d |"), (*tabela)[i][j]);
-            else if((*status)[i][j] == 0) printf(RED("%-3d |"), (*tabela)[i][j]);
+            if((*status)[i][j] == 1) printf(GREEN("| %-3d "), (*tabela)[i][j]);
+            else if((*status)[i][j] == 0) printf(RED("| %-3d "), (*tabela)[i][j]);
             else printf("%-3d ", (*tabela)[i][j]);
         }
-        printf("%d", (*dicasV)[i]);
+        printf("| %d", (*dicasV)[i]);
 
         printf("\n");
     }
 
     printf("  ");
     for(int i=0; i<n; i++){
-        printf("%-3d |", (*dicasH)[i]);  
+        printf("| %-3d ", (*dicasH)[i]);  
     }
     
     /*printf("\n");
@@ -123,7 +123,8 @@ void liberaVetores(int **vetor, int n){
 }
 
 void limpaBuffer(){
-    while(getchar() != '\n');
+    int c;
+    while((c = getchar()) != '\n' && c != EOF);
 }
 
 void mudaStatus(int ***tabela, int i, int j, int operacao){
@@ -139,4 +140,53 @@ void mudaStatus(int ***tabela, int i, int j, int operacao){
             break;
         default: printf(BOLD(RED("\nErro na operação")));
     }
+}
+
+
+
+
+
+
+void titulo(){
+
+    printf(MAGENTA(
+         "  ███████╗██╗   ██╗███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗\n"
+         "  ██╔════╝██║   ██║████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝\n"
+         "  ███████╗██║   ██║██╔████╔██║██████╔╝██║     █████╗     ██║   █████╗  \n"
+         "  ╚════██║██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  \n"
+         "  ███████║╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗\n\n")); 
+
+    int totalIterations = 30; // Total number of iterations for the loading bar
+    int currentIteration = 0; // Current iteration
+
+    printf("Loading: [");
+
+    while (currentIteration <= totalIterations) {
+        // Calculate the percentage completion
+        float progress = (float)currentIteration / totalIterations * 100;
+
+        // Print the progress bar
+        printf("%.1f%%", progress);
+
+        // Print the bar itself
+        int numBars = progress / 4; // Scale progress to the number of bars
+        printf(" [");
+        for (int i = 0; i < numBars; i++) {
+            printf("#");
+        }
+        for (int i = numBars; i < 25; i++) {
+            printf(" ");
+        }
+        printf("]");
+
+        // Clear the line to update the progress
+        fflush(stdout);
+        printf("\r");
+
+        // Sleep for a short duration to simulate loading time
+        usleep(100000); // Sleep for 100 milliseconds
+
+        currentIteration++;
+    }
+
 }
