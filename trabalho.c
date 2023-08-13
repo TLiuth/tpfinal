@@ -112,26 +112,28 @@ void inicializar(){
 }
 
 void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
-    char leitura[16], comando[12], num[3], c;
-    int x=11, i, j, pos=0, auxpos=0;
+    char leitura[50], comando[12], num[3], c;
+    int x=11, i, j, pos=0, auxpos=0, flag=1;
     limpaBuffer();
-    
+
     
 
     while(1){
-        //printf("\ec\e[3J");
+        printf("\ec\e[3J");
+
+        verificaStatus(mz->gabarito, mz->status, n);
 
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
         printf("\n");
-        //imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+        imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
         //printf("\n");
-        //imprime(&(mz->status), &(mz->status), &dicasH, &dicasV, n);
+        imprime(&(mz->status), &(mz->status), &dicasH, &dicasV, n);
         //limpaBuffer();
         printf("\n%s, digite o comando: ", nome);
 
         //Leitura do comando
-        fgets(leitura, 16, stdin);
+        fgets(leitura, 50, stdin);
 
         //aritmética para isolar o comando da posição, em caso dos comandos manter ou voltar
         int tam = strlen(leitura);
@@ -166,18 +168,18 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
             continue;
         }
 
-        
-        if(strcmp(comando, "salvar")){
-            char nomearquivo[15];
+        printf("\nCOMANDO: |%s|\n", comando);
+        char nomearquivo[15] = "a";
+        if(!strcmp(comando, "salvar")){
             auxpos=0;
-            while(pos < tam && leitura[pos]!='\n'){
-                nomearquivo[auxpos] = leitura[pos];
+            while(pos < tam){
+                printf("\nEntrou na comparação");
+                nomearquivo[auxpos] = leitura[pos+1];
                 pos++;
                 auxpos++;
             }
-            nomearquivo[auxpos] = '\0';
+            nomearquivo[auxpos-2] = '\0';
             strcat(nomearquivo, ".txt");
-            printf("\nNOME AQRUIVO: %s", nomearquivo);
         }
         
 
@@ -190,12 +192,18 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
         }else if(!strcmp(comando, "remover")){
             mudaStatus(&(mz->status), i-1, j-1, 0);
         }else if(!strcmp(comando, "voltar")){
-            printf("\nEntrou em voltar");
             salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
             menu();
             return;
         }else if(!strcmp(comando, "salvar")){
+            printf("\n\nEntrou em salvaJogo\n");
             salvaJogo(nome, nomearquivo, &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+        }else if(!strcmp(comando, "dica")){
+            dica(&(mz->gabarito), &(mz->status), n, flag);
+            flag=0;
+        }else if(!strcmp(comando, "resolver")){
+            resolve(&(mz->gabarito), &(mz->status), n);
+            printf("\nEntrou em resolver :) \n");
         }
     }
 

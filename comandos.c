@@ -67,6 +67,7 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
         for(int j=0; j<n; j++){
             if((*status)[i][j] == 1) printf(TAB_VER"\x1b[32m %-3d \x1b[0m", (*tabela)[i][j]);
             else if((*status)[i][j] == 0) printf(TAB_VER"\x1b[31m %-3d \x1b[0m", (*tabela)[i][j]);
+            else if((*status)[i][j] == 2) printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*tabela)[i][j]);
             else printf(TAB_VER" %-3d ", (*tabela)[i][j]);
         }
         printf(TAB_VER" %-3d ", (*dicasV)[i]);
@@ -194,6 +195,55 @@ void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito,
     
 
     fclose(fp);
+
+}
+
+
+void dica(int ***gabarito, int ***status, int n, int flag){
+    if(flag){
+    printf("\nFLAG 1");
+    for(int i=0; i<n; i++)
+        for(int j=0; j<n; j++){
+            if((*gabarito)[i][j] == 1 && ((*status)[i][j]!=1)){
+                printf("\nFLAG 2");
+                (*status)[i][j] = 1;
+                return;
+            }
+        }
+    }else{
+        printf(BLUE("Você já recebeu uma dica :)\n"));
+        sleep(1);
+    } 
+
+}
+
+void resolve(int ***gabarito, int ***status, int n){
+    for(int i=0; i<n; i++)
+        for(int j=0; j<n; j++){
+            if((*gabarito)[i][j] == 1 && (*status)[i][j]!=1)
+                (*status)[i][j] = 1;
+        }
+}
+
+void verificaStatus(int **gabarito, int **status, int n){
+    int flag = 1;
+
+    for(int i=0; i<n; i++)
+        for(int j=0; j<n; j++){
+            if(status[i][j] == 2)
+                status[i][j] = 1;
+        }
+
+    for(int i=0; i<n; i++)
+        for(int j=0; j<n; j++){
+            if(status[i][j] != gabarito[i][j])
+                flag = 0;
+        }
+        
+    if(flag){
+        printf("\nVocê ganhou!!");
+        sleep(2);
+    }
 
 }
 

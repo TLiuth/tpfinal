@@ -32,4 +32,10 @@ void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito,
 
 void carregaSalvo(char nomearquivo[]);
 
+void dica(int ***gabarito, int ***status, int n, int flag);
+
+void resolve(int ***gabarito, int ***status, int n);
+
+void verificaStatus(int **gabarito, int **status, int n);
+
 #endif //COMANDOS_H
