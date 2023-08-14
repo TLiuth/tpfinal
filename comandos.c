@@ -11,6 +11,10 @@ int teste(){
     return 0;
 }
 
+void limpaTerminal(){
+    printf("\ec\e[3J");
+}
+
 void alocaMemoria(int ***tabela, int n){
     *tabela = malloc(n * sizeof(int*));
 
@@ -225,24 +229,69 @@ void resolve(int ***gabarito, int ***status, int n){
         }
 }
 
-void verificaStatus(int **gabarito, int **status, int n){
+int verificaStatus(int **gabarito, int **status, int n){
     int flag = 1;
 
-    for(int i=0; i<n; i++)
+    /*for(int i=0; i<n; i++)
         for(int j=0; j<n; j++){
             if(status[i][j] == 2)
                 status[i][j] = 1;
-        }
+        }*/
+
+    /*for(int i=0; i<n; i++)
+        for(int j=0; j<n; j++){
+            if(status[i][j] != gabarito[i][j]){
+                flag = 0;
+                printf("\nEntrou no flag 0");
+                sleep(2);
+            }
+        }*/
 
     for(int i=0; i<n; i++)
         for(int j=0; j<n; j++){
-            if(status[i][j] != gabarito[i][j])
+            if(gabarito[i][j] == 1)
+                if(status[i][j] !=1 ){
                 flag = 0;
+                return 0;
+            }
         }
+
         
     if(flag){
         printf("\nVocê ganhou!!");
+        return 1;
         sleep(2);
+    }
+
+}
+
+void printInputBuffer() {
+    int c;
+    printf("Input buffer contents: ");
+    while ((c = getchar()) != '\n' && c != EOF) {
+        printf("%d ", c);
+    }
+    printf("\n");
+}
+
+void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n){
+    char flag[10] = "";
+    int tam;
+
+
+    while(strcmp(flag, "voltar") != 0){
+        limpaTerminal();
+
+        printf(BOLD(GREEN("Parabéns %s, você concluiu o jogo!!\nTempo de jogo: %d")), nome, 10);
+
+        printf("\nDigite 'voltar' para retornar ao menu principal: ");
+        fgets(flag, 10, stdin);
+        
+        tam = strlen(flag);
+        flag[tam-1] = '\0';
+
+        printf("\n|%s|", flag);
+        if(!strcmp(flag, "voltar")) return;
     }
 
 }

@@ -18,6 +18,7 @@ typedef struct
 void menu();
 void inicializar();
 void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n);
+void carregaSalvo(char nomearquivo[]);
 
 int main(){
     
@@ -121,7 +122,10 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
     while(1){
         printf("\ec\e[3J");
 
-        verificaStatus(mz->gabarito, mz->status, n);
+        if(verificaStatus(mz->gabarito, mz->status, n)){
+            telaVitoria(nome, &(mz->display), &(mz->gabarito), dicasH, dicasV, n);
+            menu();
+        }
 
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
@@ -210,7 +214,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
 }
 
 void menu(){
-    int op;
+    int op, flag;
+    char nomearquivo[25];
+    limpaTerminal();
     printf(BLUE("+ o + !!Bem vindo ao jogo SUMPLETE!! o + o "));
 
     printf("\n\n0. Sair do jogo\n1. Começar um novo jogo\n2. Continuar um jogo salvo em arquivo\n3. Continuar o jogo atual\n4. Exibir o ranking\nDurante o jogo, digite 'voltar' para retonar a esse menu.\n");
@@ -233,12 +239,25 @@ void menu(){
             exit(0);
         case 1:
             inicializar();
+            flag = 1;
             break;
         case 2:
+            limpaBuffer();
+            printf("\nEntre o nome do arquivo: ");
+            fgets(nomearquivo, 25, stdin);
+            printf("\nEntrou no menu 2");
+            carregaSalvo(nomearquivo);
             break;
         case 3:
-            carregaSalvo("temporario.txt");
-            break;
+            if(flag){
+                carregaSalvo("temporario.txt");
+                break;
+            }else{
+                printf("\nVocê ainda não iniciou um jogo.\nEscolha novamente: ");
+                sleep(2);
+                menu();
+                break;
+            }   
         case 4:
             break;
     
@@ -317,6 +336,7 @@ void menu(){
 void carregaSalvo(char nomearquivo[]){
     // *Nota: pode não ser interessante tratar o dado "nomearquivo" aqui dentro
     // *Nota: não tenha medo de expandir o código em prol da legibilidade; este é um digno objetivo junto à resolução do seu problema a ser alcançado
+    printf("\nEntrou na função");
 
     char arquivo[15], nome[15];
     int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q;
@@ -324,6 +344,8 @@ void carregaSalvo(char nomearquivo[]){
 
     FILE *fp;
     fp = fopen(nomearquivo, "r");
+
+    printf("FLAG Abriu arquivo");
 
     // n
     fscanf(fp, "%d", &n);
@@ -338,6 +360,8 @@ void carregaSalvo(char nomearquivo[]){
     alocaMemoriaDicas(&dicasV, n);
 
     zeraStatus(&(mz.status), n);
+
+    printf("\nFLAG Memória Alocada");
 
     // Matriz
     for(int i=0; i<n; i++){
@@ -380,6 +404,8 @@ void carregaSalvo(char nomearquivo[]){
         for(int j=0; j<n; j++)
             fscanf(fp, "%d", &mz.gabarito[i][j]);
     }
+
+    printf("\nFLAG Tudo carregado");
 
     /*for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)

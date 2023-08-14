@@ -64,3 +64,6 @@ problemas pra resolver dps:
     precisa de entrar 0 duas vezes no menu para Sair
     o comando marcar ou remover, se não seguidos de uma posição, impossibilitam usar o voltar
     a opção no menu deve ser escolhida com um char
+
+    a opção sair deve ser reprogramada
+    ao iniciar um jogo novo, criar um arquivo temporário que permite continuar um jogo q já existe.

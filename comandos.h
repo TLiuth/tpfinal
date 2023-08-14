@@ -4,6 +4,8 @@
 
 int teste();
 
+void limpaTerminal();
+
 void alocaMemoria(int ***matriz, int n);
 
 void preencheDisplay(int ***tabela, int n);
@@ -30,12 +32,16 @@ void titulo();
 
 void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n);
 
-void carregaSalvo(char nomearquivo[]);
+//void carregaSalvo(char nomearquivo[]);
 
 void dica(int ***gabarito, int ***status, int n, int flag);
 
 void resolve(int ***gabarito, int ***status, int n);
 
-void verificaStatus(int **gabarito, int **status, int n);
+int verificaStatus(int **gabarito, int **status, int n);
+
+void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n);
+
+void printInputBuffer(); // debugar
 
 #endif //COMANDOS_H
