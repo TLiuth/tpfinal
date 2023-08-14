@@ -251,9 +251,13 @@ int verificaStatus(int **gabarito, int **status, int n){
         for(int j=0; j<n; j++){
             if(gabarito[i][j] == 1)
                 if(status[i][j] !=1 ){
-                flag = 0;
-                return 0;
-            }
+                    flag = 0;
+                    return 0;
+            }else if(gabarito[i][j] == 0)
+                if(status[i][j] !=0 ){
+                    flag = 0;
+                    return 0;
+                }
         }
 
         

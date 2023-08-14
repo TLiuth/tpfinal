@@ -124,6 +124,11 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
 
         if(verificaStatus(mz->gabarito, mz->status, n)){
             telaVitoria(nome, &(mz->display), &(mz->gabarito), dicasH, dicasV, n);
+            liberaMatrizes(&(mz->display), n);
+            liberaMatrizes(&(mz->gabarito), n);
+            liberaMatrizes(&(mz->status), n);
+            liberaVetores(&dicasH, n);
+            liberaVetores(&dicasV, n);
             menu();
         }
 
@@ -197,6 +202,11 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
             mudaStatus(&(mz->status), i-1, j-1, 0);
         }else if(!strcmp(comando, "voltar")){
             salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+            liberaMatrizes(&(mz->display), n);
+            liberaMatrizes(&(mz->gabarito), n);
+            liberaMatrizes(&(mz->status), n);
+            liberaVetores(&dicasH, n);
+            liberaVetores(&dicasV, n);
             menu();
             return;
         }else if(!strcmp(comando, "salvar")){
@@ -235,7 +245,6 @@ void menu(){
 
     switch(op){
         case 0:
-            return;
             exit(0);
         case 1:
             inicializar();
@@ -245,7 +254,7 @@ void menu(){
             limpaBuffer();
             printf("\nEntre o nome do arquivo: ");
             fgets(nomearquivo, 25, stdin);
-            printf("\nEntrou no menu 2");
+            nomearquivo[strlen(nomearquivo)-1] = '\0';
             carregaSalvo(nomearquivo);
             break;
         case 3:
@@ -267,76 +276,9 @@ void menu(){
 }
 
 
-/*void carregaSalvo(char nomearquivo[]){
-    FILE *fp;
-    fp = fopen(nomearquivo, "r");
-    char arquivo[15], nome[15];
-    int n=0, *dicasH, *dicasV, marcados=0, removidos=0, p, q;
-    matriz mz;
-
-    printf("Entrou em carregaSalvo");
-    sleep(2);
-
-    while(fp == NULL){
-        printf("Arquivo não existe. Digite novamente.\n");
-        scanf("%s", arquivo);
-        fp = fopen(nomearquivo, "r");
-    }
-
-    fscanf(fp, "%d", &n);
-
-    printf("\nN: %d\n", n); //Debugar
-
-    alocaMemoria(&(mz.display), n);
-    alocaMemoria(&(mz.gabarito), n);
-    alocaMemoria(&(mz.status), n);
-    alocaMemoriaDicas(&dicasH, n);
-    alocaMemoriaDicas(&dicasV, n);
-
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
-            fscanf(fp, "%d", &mz.display[i][j]);
-    }
-
-    
-    for(int i=0; i<n; i++) fscanf(fp,"%d", &dicasV[i]); //Debugar
-    for(int i=0; i<n; i++) fscanf(fp,"%d", &dicasH[i]); //Debugar
-
-    for(int i=0; i<n; i++) printf("%d ", dicasV[i]); //Debugar
-    printf("\n"); //Debugar
-    for(int i=0; i<n; i++) printf("%d ", dicasH[i]); //Debugar
-    printf("\n"); //Debugar
-
-
-
-    fscanf(fp, "%d", &marcados);
-    printf("\nMARCADOS: %d", marcados); //Debugar
-
-    for(int i=0; i<marcados; i++){
-        fscanf(fp, "%d%d", &p, &q);
-        mz.status[p][q] = 1;
-    }
-    
-    fscanf(fp, "%d", &removidos);
-    for(int i=0; i<removidos; i++){
-        fscanf(fp, "%d%d", &p, &q);
-        mz.status[p][q] = 0;
-    }
-
-    fscanf(fp, "%s", nome);
-
-    fclose(fp);
-
-    sleep(15);
-    operador(nome, &mz, dicasH, dicasV, n);
-
-
-}*/
-
 void carregaSalvo(char nomearquivo[]){
     // *Nota: pode não ser interessante tratar o dado "nomearquivo" aqui dentro
     // *Nota: não tenha medo de expandir o código em prol da legibilidade; este é um digno objetivo junto à resolução do seu problema a ser alcançado
-    printf("\nEntrou na função");
 
     char arquivo[15], nome[15];
     int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q;
@@ -345,12 +287,14 @@ void carregaSalvo(char nomearquivo[]){
     FILE *fp;
     fp = fopen(nomearquivo, "r");
 
-    printf("FLAG Abriu arquivo");
+    if(fp==NULL){
+        printf("Arquivo inexistente.\n");
+        sleep(2);
+        menu();
+    }
 
     // n
     fscanf(fp, "%d", &n);
-
-    printf("\nN: %d\n", n); //Debugar
 
     // "matriz" é um tipo com matrizes dentro? Pode levar à confusão ksksk
     alocaMemoria(&(mz.display), n);
@@ -360,8 +304,6 @@ void carregaSalvo(char nomearquivo[]){
     alocaMemoriaDicas(&dicasV, n);
 
     zeraStatus(&(mz.status), n);
-
-    printf("\nFLAG Memória Alocada");
 
     // Matriz
     for(int i=0; i<n; i++){
@@ -375,22 +317,12 @@ void carregaSalvo(char nomearquivo[]){
     // Dicas (horizontal)
     for(int i=0; i<n; i++) fscanf(fp,"%d", &dicasH[i]);
 
-    // Debug (dicas)
-    /*for(int i=0; i<n; i++) printf("%d ", dicasV[i]);
-    printf("\n");
-    for(int i=0; i<n; i++) printf("%d ", dicasH[i]);
-    printf("\n");*/
-
     fscanf(fp, "%d", &marcados);
-    //printf("\nMARCADOS: %d\n", marcados); //Debugar
 
     for (int i=0; i<marcados; i++){
         fscanf(fp, "%d%d", &p, &q);
         mz.status[p][q] = 1;
     }
-    
-    // *Tem que ler denovo
-    //fscanf(fp, "%d", &marcados);
 
     fscanf(fp, "%d", &removidos);
     for(int i=0; i<removidos; i++){
@@ -405,24 +337,8 @@ void carregaSalvo(char nomearquivo[]){
             fscanf(fp, "%d", &mz.gabarito[i][j]);
     }
 
-    printf("\nFLAG Tudo carregado");
-
-    /*for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
-            printf("%d ", mz.gabarito[i][j]);
-        printf("\n");
-    }*/
-    
-    /*printf("\n");
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
-            printf("%d ", mz.status[i][j]);
-        printf("\n");
-    }*/
-
     fclose(fp);
 
     operador(nome, &mz, dicasH, dicasV, n);
-
 
 }
