@@ -17,14 +17,19 @@ typedef struct
 
 void menu();
 void inicializar();
-void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n);
+void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double);
 void carregaSalvo(char nomearquivo[]);
 
 int main(){
-    
+    int data = 0;
     printf("\ec\e[3J");
 
     //titulo();
+
+    FILE *fp = fopen("gamedata.dat", "wb");
+
+    fwrite(&data, sizeof(int), 1, fp);
+    fclose(fp);
 
     menu();
 
@@ -61,8 +66,15 @@ int main(){
 
 void inicializar(){
     char nome[15], dificuldade;
-    int n=0, *dicasH, *dicasV;
+    int n=0, *dicasH, *dicasV, data=1;
     matriz mz;
+    double tempoTotal = 0;
+
+
+    FILE *fp = fopen("gamedata.dat", "wb");
+    fwrite(&data, sizeof(int), 1, fp);
+    fclose(fp);
+
 
     printf("\ec\e[3J");
     limpaBuffer();
@@ -97,7 +109,7 @@ void inicializar(){
     preencheDicas(&(mz.display), &(mz.gabarito), &dicasH, n, "h\0");
 
 
-    operador(nome, &mz, dicasH, dicasV, n);
+    operador(nome, &mz, dicasH, dicasV, n, tempoTotal);
     menu();
     /*imprime(&(mz.display), &(mz.status), n);*/
 
@@ -112,18 +124,26 @@ void inicializar(){
 
 }
 
-void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
+void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double tempoTotal){
     char leitura[50], comando[12], num[3], c;
     int x=11, i, j, pos=0, auxpos=0, flag=1;
+    time_t tempoInicio, tempoFinal;
+    time(&tempoInicio);
     limpaBuffer();
+
+    
 
     
 
     while(1){
         printf("\ec\e[3J");
 
-        if(verificaStatus(mz->gabarito, mz->status, n)){
-            telaVitoria(nome, &(mz->display), &(mz->gabarito), dicasH, dicasV, n);
+        if(verificaStatus(mz->gabarito, mz->status, n)){   
+            time(&tempoFinal);
+            tempoTotal += difftime(tempoFinal, tempoInicio);
+
+
+            telaVitoria(nome, &(mz->display), &(mz->gabarito), dicasH, dicasV, n, tempoTotal);
             liberaMatrizes(&(mz->display), n);
             liberaMatrizes(&(mz->gabarito), n);
             liberaMatrizes(&(mz->status), n);
@@ -138,7 +158,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
         imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
         //printf("\n");
         imprime(&(mz->status), &(mz->status), &dicasH, &dicasV, n);
-        //limpaBuffer();
+        limpaBuffer();
         printf("\n%s, digite o comando: ", nome);
 
         //Leitura do comando
@@ -201,7 +221,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
         }else if(!strcmp(comando, "remover")){
             mudaStatus(&(mz->status), i-1, j-1, 0);
         }else if(!strcmp(comando, "voltar")){
-            salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+            time(&tempoFinal);
+            tempoTotal += difftime(tempoFinal, tempoInicio);
+            salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
             liberaMatrizes(&(mz->display), n);
             liberaMatrizes(&(mz->gabarito), n);
             liberaMatrizes(&(mz->status), n);
@@ -211,7 +233,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
             return;
         }else if(!strcmp(comando, "salvar")){
             printf("\n\nEntrou em salvaJogo\n");
-            salvaJogo(nome, nomearquivo, &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+            time(&tempoFinal);
+            tempoTotal += difftime(tempoFinal, tempoInicio);
+            salvaJogo(nome, nomearquivo, &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
         }else if(!strcmp(comando, "dica")){
             dica(&(mz->gabarito), &(mz->status), n, flag);
             flag=0;
@@ -226,6 +250,10 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n){
 void menu(){
     int op, flag;
     char nomearquivo[25];
+    FILE *fp = fopen("gamedata.dat", "rb");
+    fread(&flag, sizeof(int), 1, fp);
+    fclose(fp);
+
     limpaTerminal();
     printf(BLUE("+ o + !!Bem vindo ao jogo SUMPLETE!! o + o "));
 
@@ -283,6 +311,7 @@ void carregaSalvo(char nomearquivo[]){
     char arquivo[15], nome[15];
     int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q;
     matriz mz;
+    double tempoTotal;
 
     FILE *fp;
     fp = fopen(nomearquivo, "r");
@@ -337,8 +366,10 @@ void carregaSalvo(char nomearquivo[]){
             fscanf(fp, "%d", &mz.gabarito[i][j]);
     }
 
+    fscanf(fp, "%lf", &tempoTotal);
+
     fclose(fp);
 
-    operador(nome, &mz, dicasH, dicasV, n);
+    operador(nome, &mz, dicasH, dicasV, n, tempoTotal);
 
 }

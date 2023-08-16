@@ -30,7 +30,7 @@ void mudaStatus(int ***tabela, int i, int j, int operacao);
 
 void titulo();
 
-void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n);
+void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n, double);
 
 //void carregaSalvo(char nomearquivo[]);
 
@@ -40,7 +40,7 @@ void resolve(int ***gabarito, int ***status, int n);
 
 int verificaStatus(int **gabarito, int **status, int n);
 
-void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n);
+void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double);
 
 void printInputBuffer(); // debugar
 

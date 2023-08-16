@@ -128,8 +128,9 @@ void liberaVetores(int **vetor, int n){
 }
 
 void limpaBuffer(){
-    int c;
-    while((c = getchar()) != '\n' && c != EOF);
+    /*int c;
+    while((c = getchar()) != '\n' && c != EOF);*/
+    fflush(stdin);
 }
 
 void mudaStatus(int ***tabela, int i, int j, int operacao){
@@ -147,10 +148,14 @@ void mudaStatus(int ***tabela, int i, int j, int operacao){
     }
 }
 
-void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n){
+void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n, double tempoTotal){
     int marcados=0, removidos=0;
     FILE *fp;
     fp = fopen(nomearquivo, "w");
+
+
+    
+
 
     fprintf(fp, "%d\n", n);
     for(int i=0; i<n; i++){
@@ -196,6 +201,8 @@ void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito,
             fprintf(fp, "%d ", (*gabarito)[i][j]);
         fprintf(fp, "\n");
     }
+
+    fprintf(fp, "%.0lf", tempoTotal);
     
 
     fclose(fp);
@@ -230,7 +237,7 @@ void resolve(int ***gabarito, int ***status, int n){
 }
 
 int verificaStatus(int **gabarito, int **status, int n){
-    int flag = 1;
+    int flag = 0;
 
     /*for(int i=0; i<n; i++)
         for(int j=0; j<n; j++){
@@ -249,23 +256,18 @@ int verificaStatus(int **gabarito, int **status, int n){
 
     for(int i=0; i<n; i++)
         for(int j=0; j<n; j++){
-            if(gabarito[i][j] == 1)
-                if(status[i][j] !=1 ){
-                    flag = 0;
-                    return 0;
-            }else if(gabarito[i][j] == 0)
-                if(status[i][j] !=0 ){
-                    flag = 0;
-                    return 0;
-                }
+            if(gabarito[i][j] == 1 && status[i][j] == 1)
+                    flag++;
+            else if(gabarito[i][j] == 0 && status[i][j]==0)
+                    flag++;    
         }
 
         
-    if(flag){
+    if(flag==n*n){
         printf("\nVocê ganhou!!");
         return 1;
         sleep(2);
-    }
+    }else return 0;
 
 }
 
@@ -278,7 +280,7 @@ void printInputBuffer() {
     printf("\n");
 }
 
-void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n){
+void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double tempoTotal){
     char flag[10] = "";
     int tam;
 
@@ -286,7 +288,7 @@ void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *
     while(strcmp(flag, "voltar") != 0){
         limpaTerminal();
 
-        printf(BOLD(GREEN("Parabéns %s, você concluiu o jogo!!\nTempo de jogo: %d")), nome, 10);
+        printf(BOLD(GREEN("Parabéns %s, você concluiu o jogo!!\nTempo de jogo: %0.lf segundos")), nome, tempoTotal);
 
         printf("\nDigite 'voltar' para retornar ao menu principal: ");
         fgets(flag, 10, stdin);
