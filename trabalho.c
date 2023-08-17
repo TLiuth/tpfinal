@@ -67,6 +67,7 @@ int main(){
 void inicializar(){
     char nome[15], dificuldade;
     int n=0, *dicasH, *dicasV, data=1;
+    char tamt;
     matriz mz;
     double tempoTotal = 0;
 
@@ -80,18 +81,42 @@ void inicializar(){
     limpaBuffer();
     printf("Digite o nome do jogador 1: ");
     scanf("%s", nome);
+    limpaBuffer2();
+    printf("\nDigite o tamanho do tabuleiro (3 a 9): ");
+    scanf("%c", &tamt);
+    n = atoi(&tamt);
+    
 
     while(n<3 || n>9){
-        printf("\nDigite o tamanho do tabuleiro (3 a 9): ");
-        scanf("%d", &n);
-        if(n<3 || n>9) printf(RED("Tamanho inválido. Digite novamente."));
+        if(n<3 || n>9){
+            printf(RED("Tamanho inválido. Digite novamente: "));
+            limpaBuffer2();
+            scanf("%c", &tamt);
+            n = atoi(&tamt);
+        }
     }
 
-    limpaBuffer();
+    limpaBuffer2();
 
-    printf("\nDigite o nível de dificuldade (Fácil, Médio ou Difícil): ");
-    scanf("%c", &dificuldade);
-
+    if(n > 6){
+        while(1){
+            printf("\nDigite o nível de dificuldade (Fácil, Médio ou Difícil): ");
+            scanf("%c", &dificuldade);
+            getchar();
+            if(dificuldade == 'F' || dificuldade == 'f' || dificuldade == 'M' || dificuldade == 'm' || dificuldade == 'D' || dificuldade == 'd') break;
+        else printf("\nOpção de dificuldade inválida. Digite novamente: ");
+        }
+    }else if(n>4){
+        while(1){
+            printf("\nDigite o nível de dificuldade (Fácil ou Médio): ");
+            scanf("%c", &dificuldade);
+            getchar();
+            if(dificuldade == 'F' || dificuldade == 'f' || dificuldade == 'M' || dificuldade == 'm') break;
+        else printf("\nOpção de dificuldade inválida. Digite novamente: ");
+        }
+    }else dificuldade = 'F';
+    
+    
     printf("\n\n");
 
 
@@ -101,8 +126,8 @@ void inicializar(){
     alocaMemoriaDicas(&dicasH, n);
     alocaMemoriaDicas(&dicasV, n);
 
-    preencheDisplay(&(mz.display), n);
-    preencheGabarito(&(mz.gabarito), n);
+    preencheDisplay(&(mz.display), n, dificuldade);
+    preencheGabarito(&(mz.gabarito), n, dificuldade);
     zeraStatus(&(mz.status), n);
 
     preencheDicas(&(mz.display), &(mz.gabarito), &dicasV, n, "v\0");
@@ -131,12 +156,12 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
     time(&tempoInicio);
     limpaBuffer();
 
-    
+    criaRanking(nome, tempoTotal, n);
 
     
 
     while(1){
-        printf("\ec\e[3J");
+        //printf("\ec\e[3J");
 
         if(verificaStatus(mz->gabarito, mz->status, n)){   
             time(&tempoFinal);
@@ -187,9 +212,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             num[2] = '\0';
             x = atoi(num);
             j = x%10;
-            i = x/10;
+            i = x/10;   
         }
-
+        
         //posições que não abrangem o tamanho do tabuleiro são inválidas
         if(x < 11 || x>((10*n)+n)){
             printf(BOLD(RED("\nPosição inválida.\n")));
@@ -248,9 +273,18 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
 }
 
 void menu(){
-    int op, flag;
-    char nomearquivo[25];
+    int flag;
+    char nomearquivo[25], op;
     FILE *fp = fopen("gamedata.dat", "rb");
+    
+    
+    /*FILE *ini = fopen("sumplete.ini", "w");
+
+    for(int i=3; i<10; i++)
+        fprintf(ini, "size = %d\n\n", i);*/
+    
+    leRanking();
+
     fread(&flag, sizeof(int), 1, fp);
     fclose(fp);
 
@@ -261,31 +295,24 @@ void menu(){
     printf("\n\nEscolha uma opção: ");
 
     
-    scanf("%d", &op);
+    scanf("%c", &op);
 
-    while(op<0 || op>4){
-        printf("\n\nEscolha uma opção: ");
-        scanf("%d", &op);
-        if(op<0 || op>4)
-            printf(RED("Comando inválido. Digite novamente"));
-        
-    }
-
-    switch(op){
-        case 0:
+    while(1){
+        switch(op){
+        case '0':
             exit(0);
-        case 1:
+        case '1':
             inicializar();
             flag = 1;
             break;
-        case 2:
+        case '2':
             limpaBuffer();
             printf("\nEntre o nome do arquivo: ");
             fgets(nomearquivo, 25, stdin);
             nomearquivo[strlen(nomearquivo)-1] = '\0';
             carregaSalvo(nomearquivo);
             break;
-        case 3:
+        case '3':
             if(flag){
                 carregaSalvo("temporario.txt");
                 break;
@@ -295,11 +322,17 @@ void menu(){
                 menu();
                 break;
             }   
-        case 4:
+        case '4':
             break;
-    
-    
+        default:
+            limpaBuffer();
+            printf("\rComando não reconhecido. Digite novamente: ");
+            scanf("%c", &op);
+            break;
+        }    
     }
+
+    
 
 }
 

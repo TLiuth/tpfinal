@@ -28,27 +28,83 @@ void alocaMemoriaDicas(int **vetor, int n){
     *vetor = malloc(n * sizeof(int));
 }
 
-void preencheDisplay(int ***tabela, int n){
-    
+void preencheDisplay(int ***tabela, int n, char dificuldade){
+    int sinal, aux;
     srand(time(NULL));
 
-    for(int i=0; i<n; i++)
-        for(int j=0; j<n; j++)
-            (*tabela)[i][j] = ((rand()%12)+1);
+    if(dificuldade=='F' || dificuldade == 'f'){
+        for(int i=0; i<n; i++)
+            for(int j=0; j<n; j++)
+                (*tabela)[i][j] = ((rand()%9)+1);
+
+    }else if(dificuldade == 'M' || dificuldade == 'm'){
+        for(int i=0; i<n; i++)
+            for(int j=0; j<n; j++){
+                aux = (rand()%3)+1;
+                if(aux==1) sinal=-1;
+                else sinal=1;
+                (*tabela)[i][j] = sinal*((rand()%9)+1);
+            }
+            
+    }else if(dificuldade == 'D' || dificuldade == 'd'){
+        for(int i=0; i<n; i++)
+            for(int j=0; j<n; j++){
+                aux = (rand()%3)+1;
+                if(aux==1) sinal=-1;
+                else sinal=1;
+                (*tabela)[i][j] = sinal*((rand()%10));
+            }
+    }
     
 }
 
-void preencheGabarito(int ***tabela, int n){
-    int aux;
+void preencheGabarito(int ***tabela, int n, char dificuldade){
+    int cont1, cont0, aux;
 
     srand(time(NULL));
 
-    for(int i=0; i<n; i++)
-        for(int j=0; j<n; j++){
-            aux = (rand()%10)+1;
-            if(aux<4) (*tabela)[i][j] = 1;
-            else (*tabela)[i][j] = 0;
+    if(dificuldade=='F' || dificuldade == 'f'){
+        for(int i=0; i<n; i++)
+            for(int j=0; j<n; j++){
+                aux = (rand()%10)+1;
+                if(aux<5) (*tabela)[i][j] = 1;
+                else (*tabela)[i][j] = 0;
+            }
+
+    }else if(dificuldade=='M' || dificuldade == 'm'){
+        for(int i=0; i<n; i++){
+            cont1 = 0;
+            cont0 = 0;
+            for(int j=0; j<n; j++){
+                aux = (rand()%10)+1;
+                if(aux<5){
+                    (*tabela)[i][j] = 1;
+                    cont1++;
+                }else{
+                    (*tabela)[i][j] = 0;
+                    cont0++;
+                }
+                if(cont1 == n || cont0 == n) preencheGabarito(tabela, n, dificuldade); 
+            }
         }
+
+    }else if(dificuldade=='D' || dificuldade == 'd'){
+        for(int i=0; i<n; i++){
+            cont1 = 0;
+            for(int j=0; j<n; j++){
+                aux = (rand()%10)+1;
+                if(aux<5){
+                    (*tabela)[i][j] = 1;
+                    cont1++;
+                }else{
+                    (*tabela)[i][j] = 0;
+                }
+                if(cont1 == n) preencheGabarito(tabela, n, dificuldade); 
+            }
+        }
+            
+    }
+    
     
 }
 
@@ -63,25 +119,25 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
     printf("\n");
 
     printf("  ");
-    for(int i=0; i<n; i++) printf(TAB_VER" %-3d ", i+1);
+    for(int i=0; i<n; i++) printf(TAB_VER"\x1b[36m %-3d \x1b[0m", i+1);
     printf("\n");
 
     for(int i=0; i<n; i++){
-        printf("%d ", i+1);
+        printf(CYAN("%d "), i+1);
         for(int j=0; j<n; j++){
             if((*status)[i][j] == 1) printf(TAB_VER"\x1b[32m %-3d \x1b[0m", (*tabela)[i][j]);
             else if((*status)[i][j] == 0) printf(TAB_VER"\x1b[31m %-3d \x1b[0m", (*tabela)[i][j]);
             else if((*status)[i][j] == 2) printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*tabela)[i][j]);
             else printf(TAB_VER" %-3d ", (*tabela)[i][j]);
         }
-        printf(TAB_VER" %-3d ", (*dicasV)[i]);
+        printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*dicasV)[i]);
 
         printf("\n");
     }
 
     printf("  ");
     for(int i=0; i<n; i++){
-        printf(TAB_VER" %-3d ", (*dicasH)[i]);  
+        printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*dicasH)[i]);  
     }
     
     /*printf("\n");
@@ -128,9 +184,12 @@ void liberaVetores(int **vetor, int n){
 }
 
 void limpaBuffer(){
-    /*int c;
-    while((c = getchar()) != '\n' && c != EOF);*/
     fflush(stdin);
+}
+
+void limpaBuffer2(){
+    int c;
+    while((c = getchar()) != '\n' && c != EOF);
 }
 
 void mudaStatus(int ***tabela, int i, int j, int operacao){
@@ -296,12 +355,80 @@ void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *
         tam = strlen(flag);
         flag[tam-1] = '\0';
 
-        printf("\n|%s|", flag);
+        criaRanking(nome, tempoTotal, n);
+
+
+        //printf("\n|%s|", flag);
         if(!strcmp(flag, "voltar")) return;
     }
 
 }
 
+
+void criaRanking(char nome[], double tempoTotal, int tam){
+    FILE *fp = fopen("sumplete.ini", "r+");
+    char pos[100];
+    int linha=0;
+
+    Ranking ranking;
+
+    ranking;
+
+    //strcpy(ranking.nome[tam][pos], nome);
+    //ranking.tempo[tam][pos] = tempoTotal;
+
+    
+
+    printf("\nLinha: %d\n", linha);
+
+
+}
+
+void leRanking(){
+    FILE *fp = fopen("sumplete.ini", "r");
+    int aux[6] = {0}, pos=1;
+    double segundos;
+    char c, linha1[40], linha2[40], trash[40], seg[5], nome[15];
+    Ranking ranking;
+
+    fgets(trash, sizeof(trash), fp);
+    fgets(linha1, sizeof(linha1), fp) == NULL || fgets(linha2, sizeof(linha2), fp);
+    while (1) {
+        // Remove the newline character from the end of the line
+        
+        //fgets(linha1, sizeof(linha1), fp);
+        //fgets(linha2, sizeof(linha2), fp);
+        linha1[strcspn(linha1, "\n")] = '\0';
+        linha2[strcspn(linha2, "\n")] = '\0';
+
+        //strcpy(ranking.nome[0][pos], linha1);
+
+        
+
+        strcpy(ranking.nome[0][pos], strchr(linha1, '=') + 2);
+     
+        ranking.tempo[0][pos] = 1.0*(atoi(strchr(linha2, '=') + 2));
+
+        printf("\nLinha: %s  Pos: %d", ranking.nome[0][pos] ,pos);
+        printf("\nLinha: %lf  Pos: %d", ranking.tempo[0][pos], pos);
+
+        if(fgets(linha1, sizeof(linha1), fp) == NULL || fgets(linha2, sizeof(linha2), fp) == NULL) break;
+
+        if (strcmp(linha1, "size = 4") == 0 || strcmp(linha2, "size = 4") == 0){
+            break; // Exit the loop when "size = 4" is encountered
+            pos = 0;
+        }
+
+        
+
+        pos++;
+    }
+
+    sleep(15);
+
+    
+
+}
 
 
 void titulo(){
