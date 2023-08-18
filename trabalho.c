@@ -156,7 +156,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
     time(&tempoInicio);
     limpaBuffer();
 
-    criaRanking(nome, tempoTotal, n);
+    //criaRanking(nome, tempoTotal, n);
 
     
 
@@ -222,19 +222,19 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             continue;
         }
 
-        printf("\nCOMANDO: |%s|\n", comando);
-        char nomearquivo[15] = "a";
+        char nomearquivo[25] = "a";
         if(!strcmp(comando, "salvar")){
-            auxpos=0;
-            while(pos < tam){
-                printf("\nEntrou na comparação");
-                nomearquivo[auxpos] = leitura[pos+1];
-                pos++;
-                auxpos++;
+                auxpos=0;
+                while(pos < tam){
+                    nomearquivo[auxpos] = leitura[pos+1];
+                    pos++;
+                    auxpos++;
+                }
+                nomearquivo[auxpos-2] = '\0';
+ 
             }
-            nomearquivo[auxpos-2] = '\0';
-            strcat(nomearquivo, ".txt");
-        }
+            
+        
         
 
 
@@ -257,7 +257,13 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             menu();
             return;
         }else if(!strcmp(comando, "salvar")){
-            printf("\n\nEntrou em salvaJogo\n");
+
+            while(!verificaFormato(nomearquivo)){
+                printf("\nNome de arquivo inválido. Entre o nome do arquivo novamente: ");
+                limpaBuffer();
+                scanf("%s", nomearquivo);
+            }
+
             time(&tempoFinal);
             tempoTotal += difftime(tempoFinal, tempoInicio);
             salvaJogo(nome, nomearquivo, &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
@@ -283,7 +289,7 @@ void menu(){
     for(int i=3; i<10; i++)
         fprintf(ini, "size = %d\n\n", i);*/
     
-    leRanking();
+    //leRanking();
 
     fread(&flag, sizeof(int), 1, fp);
     fclose(fp);

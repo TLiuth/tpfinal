@@ -315,7 +315,7 @@ int verificaStatus(int **gabarito, int **status, int n){
 
     for(int i=0; i<n; i++)
         for(int j=0; j<n; j++){
-            if(gabarito[i][j] == 1 && status[i][j] == 1)
+            if((gabarito[i][j] == 1 && status[i][j] == 1) || (gabarito[i][j] == 1 && status[i][j] == -1))
                     flag++;
             else if(gabarito[i][j] == 0 && status[i][j]==0)
                     flag++;    
@@ -385,49 +385,97 @@ void criaRanking(char nome[], double tempoTotal, int tam){
 }
 
 void leRanking(){
-    FILE *fp = fopen("sumplete.ini", "r");
-    int aux[6] = {0}, pos=1;
+    FILE *fp = fopen("sumplete.ini", "r"); 
+    int aux[6] = {0}, pos, tam;
     double segundos;
-    char c, linha1[40], linha2[40], trash[40], seg[5], nome[15];
+    char c, linha1[40], trash[40], seg[5], nome[15], linhaaux[15];
     Ranking ranking;
 
-    fgets(trash, sizeof(trash), fp);
-    fgets(linha1, sizeof(linha1), fp) == NULL || fgets(linha2, sizeof(linha2), fp);
+
     while (1) {
-        // Remove the newline character from the end of the line
-        
-        //fgets(linha1, sizeof(linha1), fp);
-        //fgets(linha2, sizeof(linha2), fp);
+        pos = 0;
+        fgets(linha1, sizeof(linha1), fp);
         linha1[strcspn(linha1, "\n")] = '\0';
-        linha2[strcspn(linha2, "\n")] = '\0';
 
-        //strcpy(ranking.nome[0][pos], linha1);
+        printf("\nLinha Completa |%s|", linha1);
+        printf("\nLinha Aux |%s|", linhaaux);
 
-        
+        sleep(2);
 
-        strcpy(ranking.nome[0][pos], strchr(linha1, '=') + 2);
-     
-        ranking.tempo[0][pos] = 1.0*(atoi(strchr(linha2, '=') + 2));
-
-        printf("\nLinha: %s  Pos: %d", ranking.nome[0][pos] ,pos);
-        printf("\nLinha: %lf  Pos: %d", ranking.tempo[0][pos], pos);
-
-        if(fgets(linha1, sizeof(linha1), fp) == NULL || fgets(linha2, sizeof(linha2), fp) == NULL) break;
-
-        if (strcmp(linha1, "size = 4") == 0 || strcmp(linha2, "size = 4") == 0){
-            break; // Exit the loop when "size = 4" is encountered
-            pos = 0;
+        int i=0;
+            while((c = getchar())!=' '){
+                c = linha1[i];
+                if(c==' ') linhaaux[i] = '\0';
+                else linhaaux[i] = c;
+                i++;
         }
+        linhaaux[i] = '\0';
 
         
 
-        pos++;
+        if(strcmp(linhaaux, "size")==0){
+            while(1){
+                /*printf("\nEntrou no strcmp");
+                strcpy(tamc, strchr(linha1, '=') + 2);
+                printf("\ntamc: |%s|", tamc);
+                if(strcmp(tamc, "3")) tam = 3;*/
+
+                fgets(linha1, 15, fp);
+                strcpy(ranking.nome[tam-3][pos], strchr(linha1, '=') + 2);
+
+                fgets(linha1, 15, fp);
+                ranking.tempo[tam-3][pos] = 1.0*(atoi(strchr(linha1, '=') + 2));
+
+                int i=0;
+                    while((c = getchar())!=' '){
+                        c = linha1[i];
+                        if(c==' ') linhaaux[i] = '\0';
+                        else linhaaux[i] = c;
+                        i++;
+                }
+
+                linhaaux[i] = '\0';
+
+                if(linhaaux[0] == '\0'){
+                    printf("\nLinha em branco");
+                    tam++;
+                    break;
+                }
+
+                printf("\nLinha: %s  Pos: %d", ranking.nome[tam-3][pos], pos);
+                printf("\nLinha: %.0lf  Pos: %d", ranking.tempo[tam-3][pos], pos);
+
+
+                pos++;
+
+                
+
+            }
+            
+        }       
     }
 
     sleep(15);
 
     
 
+}
+
+int verificaFormato(char nome[25]){
+    char aux[5];
+    int tam, cont=3;
+
+    tam = strlen(nome);
+
+    for(int i=tam-1; i>tam-4-1 && cont >= 0; i--){
+        aux[cont] = nome[i];
+        cont --;
+    }
+
+    aux[4] = '\0';
+
+    if(strcmp(aux, ".txt")==0) return 1;
+    else return 0;
 }
 
 

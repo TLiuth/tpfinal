@@ -46,6 +46,8 @@ void resolve(int ***gabarito, int ***status, int n);
 
 int verificaStatus(int **gabarito, int **status, int n);
 
+int verificaFormato(char nome[15]);
+
 void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double);
 
 void criaRanking(char nome[], double tempoTotal, int);
