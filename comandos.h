@@ -1,9 +1,23 @@
 #ifndef COMANDOS_H //evita múltiplas inclusões
 #define COMANDOS_H
+#define MAXJOGADORES 5
+#define TAMNOME 64
+#define QTDGAPS 7
+#define TAMPALAVRA 50
+
+typedef struct {
+    char nome[TAMNOME];
+    double tempo;
+} Jogador;
+
+typedef struct {
+    int tam;
+    int qtd;
+    Jogador jogadores[MAXJOGADORES];
+}SizeGap;
 
 typedef struct{
-    char nome[6][5][15];
-    double tempo[6][5];
+    SizeGap gap[QTDGAPS];
 }Ranking;
 
 int teste();
@@ -50,9 +64,9 @@ int verificaFormato(char nome[15]);
 
 void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double);
 
-void criaRanking(char nome[], double tempoTotal, int);
+void imprimeRanking(Ranking rk);
 
-void leRanking();
+Ranking leRanking();
 
 void printInputBuffer(); // debugar
 

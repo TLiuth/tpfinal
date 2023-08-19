@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 
+
 int teste(){
     printf("Testando comando\n");
     return 0;
@@ -355,110 +356,79 @@ void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *
         tam = strlen(flag);
         flag[tam-1] = '\0';
 
-        criaRanking(nome, tempoTotal, n);
-
-
         //printf("\n|%s|", flag);
         if(!strcmp(flag, "voltar")) return;
     }
 
 }
 
+void imprimeRanking(Ranking rk){
+    printf("Entrou em Imprimir ranking\n");
+    for(int i=0; i<QTDGAPS; i++){
+        if(rk.gap[i].qtd == 0) continue;
+        printf("Size = %d\n", rk.gap[i].tam);
 
-void criaRanking(char nome[], double tempoTotal, int tam){
-    FILE *fp = fopen("sumplete.ini", "r+");
-    char pos[100];
-    int linha=0;
-
-    Ranking ranking;
-
-    ranking;
-
-    //strcpy(ranking.nome[tam][pos], nome);
-    //ranking.tempo[tam][pos] = tempoTotal;
-
-    
-
-    printf("\nLinha: %d\n", linha);
-
-
+        for(int j=0; j<rk.gap[i].qtd; j++){
+            printf("\tNome = %s\n\tTempo = %0.lf\n", rk.gap[i].jogadores[j].nome, rk.gap[i].jogadores[j].tempo);
+        }
+    }
+    sleep(10);
 }
 
-void leRanking(){
-    FILE *fp = fopen("sumplete.ini", "r"); 
-    int aux[6] = {0}, pos, tam;
-    double segundos;
-    char c, linha1[40], trash[40], seg[5], nome[15], linhaaux[15];
-    Ranking ranking;
 
-
-    while (1) {
-        pos = 0;
-        fgets(linha1, sizeof(linha1), fp);
-        linha1[strcspn(linha1, "\n")] = '\0';
-
-        printf("\nLinha Completa |%s|", linha1);
-        printf("\nLinha Aux |%s|", linhaaux);
-
-        sleep(2);
-
-        int i=0;
-            while((c = getchar())!=' '){
-                c = linha1[i];
-                if(c==' ') linhaaux[i] = '\0';
-                else linhaaux[i] = c;
-                i++;
-        }
-        linhaaux[i] = '\0';
-
-        
-
-        if(strcmp(linhaaux, "size")==0){
-            while(1){
-                /*printf("\nEntrou no strcmp");
-                strcpy(tamc, strchr(linha1, '=') + 2);
-                printf("\ntamc: |%s|", tamc);
-                if(strcmp(tamc, "3")) tam = 3;*/
-
-                fgets(linha1, 15, fp);
-                strcpy(ranking.nome[tam-3][pos], strchr(linha1, '=') + 2);
-
-                fgets(linha1, 15, fp);
-                ranking.tempo[tam-3][pos] = 1.0*(atoi(strchr(linha1, '=') + 2));
-
-                int i=0;
-                    while((c = getchar())!=' '){
-                        c = linha1[i];
-                        if(c==' ') linhaaux[i] = '\0';
-                        else linhaaux[i] = c;
-                        i++;
-                }
-
-                linhaaux[i] = '\0';
-
-                if(linhaaux[0] == '\0'){
-                    printf("\nLinha em branco");
-                    tam++;
-                    break;
-                }
-
-                printf("\nLinha: %s  Pos: %d", ranking.nome[tam-3][pos], pos);
-                printf("\nLinha: %.0lf  Pos: %d", ranking.tempo[tam-3][pos], pos);
-
-
-                pos++;
-
-                
-
-            }
-            
-        }       
-    }
-
-    sleep(15);
+Ranking leRanking(){
+    FILE *fp = fopen("sumplete.ini", "r");
+    Ranking rk;
+    int size;
+    char palavra[TAMPALAVRA];
 
     
+    for (int i = 0; i < 7; i++) {
+        rk.gap[i].qtd = 0;
+        rk.gap[i].tam = i + 3;
+    }
 
+    fscanf(fp, "%s", palavra);
+
+    for(int i=0; i<7 || !feof(fp); i++){
+        
+        fscanf(fp, "%s", palavra);  // =
+        fscanf(fp, "%d", &size);
+
+        int j = 0;
+        for(j=0; j<MAXJOGADORES; j++){
+            fscanf(fp, "%s", palavra);
+
+            if(palavra[0] != 'j') {
+                break;
+            }   
+                
+            fscanf(fp, "%s", palavra);
+            fgets(palavra, TAMPALAVRA, fp);
+            palavra[strlen(palavra) - 1] = '\0';
+            strcpy(rk.gap[size-3].jogadores[j].nome, palavra);
+            
+
+            fscanf(fp, "%s", palavra);
+            fscanf(fp, "%s", palavra);
+            fscanf(fp, "%lf", &rk.gap[size-3].jogadores[j].tempo);
+            rk.gap[size-3].qtd++;
+        }
+        
+
+    }
+
+    for(int i=0; i<7; i++){
+        printf("TAM: %d (%d)\n", i+3, rk.gap[i].qtd);
+        
+        for(int j=0; j<rk.gap[i].qtd; j++){
+            printf("Nome: %s   Tempo: %lf\n", rk.gap[i].jogadores[j].nome, rk.gap[i].jogadores[j].tempo);
+        }
+        printf("\n");
+    }
+
+    fclose(fp);
+    return rk;
 }
 
 int verificaFormato(char nome[25]){

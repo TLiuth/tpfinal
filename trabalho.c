@@ -22,6 +22,7 @@ void carregaSalvo(char nomearquivo[]);
 
 int main(){
     int data = 0;
+    Ranking rk = leRanking();
     printf("\ec\e[3J");
 
     //titulo();
@@ -30,6 +31,9 @@ int main(){
 
     fwrite(&data, sizeof(int), 1, fp);
     fclose(fp);
+
+
+    imprimeRanking(rk);
 
     menu();
 
@@ -70,6 +74,8 @@ void inicializar(){
     char tamt;
     matriz mz;
     double tempoTotal = 0;
+    
+
 
 
     FILE *fp = fopen("gamedata.dat", "wb");
