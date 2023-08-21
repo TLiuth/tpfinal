@@ -109,7 +109,7 @@ void preencheGabarito(int ***tabela, int n, char dificuldade){
     
 }
 
-void zeraStatus(int ***tabela, int n){
+void resetaStatus(int ***tabela, int n){
     for(int i=0; i<n; i++)
         for(int j=0; j<n; j++)
             (*tabela)[i][j] = -1;
@@ -119,26 +119,28 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
 
     printf("\n");
 
-    printf("  ");
-    for(int i=0; i<n; i++) printf(TAB_VER"\x1b[36m %-3d \x1b[0m", i+1);
+    printf("  "); // Índice superior
+    for(int i=0; i<n; i++) printf(TAB_VER"\x1b[33m %-3d \x1b[0m", i+1);
     printf("\n");
 
     for(int i=0; i<n; i++){
-        printf(CYAN("%d "), i+1);
+        printf("\x1b[33m%d \x1b[0m", i+1);
         for(int j=0; j<n; j++){
             if((*status)[i][j] == 1) printf(TAB_VER"\x1b[32m %-3d \x1b[0m", (*tabela)[i][j]);
             else if((*status)[i][j] == 0) printf(TAB_VER"\x1b[31m %-3d \x1b[0m", (*tabela)[i][j]);
             else if((*status)[i][j] == 2) printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*tabela)[i][j]);
             else printf(TAB_VER" %-3d ", (*tabela)[i][j]);
         }
-        printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*dicasV)[i]);
+        if(verificaVetor(*dicasV, *tabela, *status, n, i)) printf(TAB_VER"\x1b[1m\x1b[34m %-3d \x1b[0m", (*dicasV)[i]); // dicas verticais
+        else printf(TAB_VER"\x1b[36m %-3d \x1b[0m", (*dicasV)[i]); // dicas verticais
 
         printf("\n");
     }
 
     printf("  ");
     for(int i=0; i<n; i++){
-        printf(TAB_VER"\x1b[34m %-3d \x1b[0m", (*dicasH)[i]);  
+        if(verificaVetorH(*dicasH, *tabela, *status, n, i)) printf(TAB_VER"\x1b[1m\x1b[34m %-3d \x1b[0m", (*dicasH)[i]);
+        else printf(TAB_VER"\x1b[36m %-3d \x1b[0m", (*dicasH)[i]);  // dicas horizontais
     }
     
     /*printf("\n");
@@ -152,6 +154,31 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n){
     printf("\n");*/
     
 }
+
+int verificaVetor(int vetor[], int **tabela, int **status, int n, int i){
+    int soma = 0;
+    for(int j=0; j<n; j++){
+        if(status[i][j] != 0) soma += tabela[i][j];
+    }
+
+    if(soma==vetor[i]) return 1;
+    else return 0;
+
+}
+
+int verificaVetorH(int vetor[], int **tabela, int **status, int n, int i){
+    int soma = 0;
+    for(int j=0; j<n; j++){
+        if(status[j][i] != 0) soma += tabela[j][i];
+        //printf("\n>>%d : %d\n", j, tabela[j][i]);
+    }
+
+    if(soma==vetor[i]) return 1;
+    else return 0;
+
+}
+
+
 
 void preencheDicas(int ***tabela, int ***gabarito, int **vetor, int n, char c[2]){
 
@@ -293,6 +320,8 @@ void resolve(int ***gabarito, int ***status, int n){
         for(int j=0; j<n; j++){
             if((*gabarito)[i][j] == 1 && (*status)[i][j]!=1)
                 (*status)[i][j] = 1;
+            else if((*gabarito)[i][j] == 0 && (*status)[i][j]!=0)
+                (*status)[i][j] = 0;
         }
 }
 
@@ -343,12 +372,17 @@ void printInputBuffer() {
 void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double tempoTotal){
     char flag[10] = "";
     int tam;
+    Ranking rk;
 
 
     while(strcmp(flag, "voltar") != 0){
         limpaTerminal();
 
-        printf(BOLD(GREEN("Parabéns %s, você concluiu o jogo!!\nTempo de jogo: %0.lf segundos")), nome, tempoTotal);
+        printf(BOLD(GREEN("Parabéns %s, você concluiu o jogo!!\nTempo de jogo: %0.lf segundos\n")), nome, tempoTotal);
+
+        rk = atualizaRanking(tempoTotal, nome, n);
+        imprimeRanking(rk, 't', n);
+        imprimeRanking(rk, 'a', n);
 
         printf("\nDigite 'voltar' para retornar ao menu principal: ");
         fgets(flag, 10, stdin);
@@ -356,31 +390,94 @@ void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *
         tam = strlen(flag);
         flag[tam-1] = '\0';
 
-        //printf("\n|%s|", flag);
         if(!strcmp(flag, "voltar")) return;
     }
 
 }
 
-void imprimeRanking(Ranking rk){
-    printf("Entrou em Imprimir ranking\n");
-    for(int i=0; i<QTDGAPS; i++){
-        if(rk.gap[i].qtd == 0) continue;
-        printf("Size = %d\n", rk.gap[i].tam);
+Ranking atualizaRanking(double tempo, char nome[TAMNOME], int n){
+    Ranking rk, auxrk;
+    rk = leRanking();
+    auxrk = rk;
 
-        for(int j=0; j<rk.gap[i].qtd; j++){
-            printf("\tNome = %s\n\tTempo = %0.lf\n", rk.gap[i].jogadores[j].nome, rk.gap[i].jogadores[j].tempo);
+    if(rk.gap[n-3].qtd == 0){
+        rk.gap[n-3].jogadores[0].tempo = tempo;
+        strcpy(rk.gap[n-3].jogadores[0].nome, nome);
+        if(rk.gap[n-3].qtd < 5) rk.gap[n-3].qtd++;
+        return rk;
+    }
+
+    if(rk.gap[n-3].qtd < 5) rk.gap[n-3].qtd++;
+
+    for(int i = 0; i<rk.gap[n-3].qtd; i++){
+        if(tempo<rk.gap[n-3].jogadores[i].tempo){
+            rk.gap[n-3].jogadores[i].tempo = tempo;
+            strcpy(rk.gap[n-3].jogadores[i].nome, nome);
+            for(int j=rk.gap[n-3].qtd - 1; j>i; j--){
+                rk.gap[n-3].jogadores[j].tempo = auxrk.gap[n-3].jogadores[j-1].tempo;
+                strcpy(rk.gap[n-3].jogadores[j].nome, auxrk.gap[n-3].jogadores[j-1].nome);
+            }
+            return rk;
         }
     }
-    sleep(10);
+
+
+    return rk;
+
 }
+
+
+void imprimeRanking(Ranking rk, char op, int n){
+    char flag[10] = "";
+    int tam;
+
+    limpaBuffer2();
+
+    
+        if(op=='t'){
+            for(int i=0; i<QTDGAPS; i++){
+                if(rk.gap[i].qtd == 0) continue;
+                printf("\nSize = %d\n", rk.gap[i].tam);
+
+                for(int j=0; j<rk.gap[i].qtd; j++){
+                    printf("\tNome%d = %s\n\tTempo%d = %0.lf\n", j+1, rk.gap[i].jogadores[j].nome, j+1, rk.gap[i].jogadores[j].tempo);
+                }
+            }
+
+            while(strcmp(flag, "voltar") != 0){
+                printf("\nDigite 'voltar' para retornar ao menu principal: ");
+                fgets(flag, 10, stdin);
+                tam = strlen(flag);
+                flag[tam-1] = '\0';
+                printf("|%s|", flag);
+            }
+        
+        if(!strcmp(flag, "voltar")) return;
+
+        }else{
+            FILE *fp = fopen("sumplete.ini", "w");
+            for(int i=0; i<QTDGAPS; i++){
+                if(rk.gap[i].qtd == 0) continue;
+                fprintf(fp, "size = %d\n", rk.gap[i].tam);
+
+                for(int j=0; j<rk.gap[i].qtd; j++){
+                    //printf("\nQuantidade %d: %d", i, rk.gap[i].qtd); linha pra debugar
+                    fprintf(fp, "player%d = %s\ntime%d = %0.lf\n", j+1, rk.gap[i].jogadores[j].nome, j+1, rk.gap[i].jogadores[j].tempo);
+                }
+            }
+            fclose(fp);
+            return;
+        
+    }
+}
+
 
 
 Ranking leRanking(){
     FILE *fp = fopen("sumplete.ini", "r");
     Ranking rk;
     int size;
-    char palavra[TAMPALAVRA];
+    char palavra[TAMPALAVRA], palavraauxiliar[TAMPALAVRA];
 
     
     for (int i = 0; i < 7; i++) {
@@ -397,34 +494,28 @@ Ranking leRanking(){
 
         int j = 0;
         for(j=0; j<MAXJOGADORES; j++){
-            fscanf(fp, "%s", palavra);
+            fscanf(fp, "%s", palavra); //player
 
-            if(palavra[0] != 'j') {
+            if(palavra[0] != 'p') {
                 break;
             }   
                 
-            fscanf(fp, "%s", palavra);
+            //fscanf(fp, "%s", palavra); // =
+            fgets(palavra, 4, fp);
             fgets(palavra, TAMPALAVRA, fp);
+
             palavra[strlen(palavra) - 1] = '\0';
             strcpy(rk.gap[size-3].jogadores[j].nome, palavra);
             
-
             fscanf(fp, "%s", palavra);
             fscanf(fp, "%s", palavra);
             fscanf(fp, "%lf", &rk.gap[size-3].jogadores[j].tempo);
-            rk.gap[size-3].qtd++;
+            if(rk.gap[size-3].qtd<5) rk.gap[size-3].qtd++;
+            //printf("\nQuantidade %d: %d", i, rk.gap[i].qtd); linha pra debugar
+        
         }
         
 
-    }
-
-    for(int i=0; i<7; i++){
-        printf("TAM: %d (%d)\n", i+3, rk.gap[i].qtd);
-        
-        for(int j=0; j<rk.gap[i].qtd; j++){
-            printf("Nome: %s   Tempo: %lf\n", rk.gap[i].jogadores[j].nome, rk.gap[i].jogadores[j].tempo);
-        }
-        printf("\n");
     }
 
     fclose(fp);

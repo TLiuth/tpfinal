@@ -7,12 +7,12 @@
 #include <time.h>
 #include <unistd.h>
 
-
+//Struct usada para as matrizes principais do jogo
 typedef struct 
 {
-    int **display;
-    int **gabarito;
-    int **status;
+    int **display; //Matriz com os números que serão impressos aos jogadores
+    int **gabarito; //Matriz com a combinação de valores Os e 1s que definem quais valores entram na contagem
+    int **status; //Matriz que armazena o estado definido pelo jogador para a posição (mantido ou removido)
 }matriz;
 
 void menu();
@@ -21,78 +21,46 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double);
 void carregaSalvo(char nomearquivo[]);
 
 int main(){
-    int data = 0;
-    Ranking rk = leRanking();
-    printf("\ec\e[3J");
 
-    //titulo();
-
+    int flag = 0; //Valor auxiliar para definição de se há jogo a ser continuado ou não
     FILE *fp = fopen("gamedata.dat", "wb");
-
-    fwrite(&data, sizeof(int), 1, fp);
+    fwrite(&flag, sizeof(int), 1, fp); //O valor auxiliar é armazenado em um arquivo binário
     fclose(fp);
 
+    limpaTerminal(); //Limpa o espaço do terminal
 
-    imprimeRanking(rk);
+    titulo(); //Função título de abertura do jogo
 
-    menu();
-
-
-
-
-    /*for(int i=0; i<n; i++) printf("\n%d", dicasV[i]);
-    printf("\n\n");
-    for(int i=0; i<n; i++) printf("\n%d", dicasH[i]);
-    printf("\n\n");*/
-
-    /*mz.status[1][3] = -1;
-    mz.status[2][3] = -1;
-    mz.status[2][4] = -1;
-    mz.status[4][4] = 1;
-    mz.status[5][4] = 1;
-    mz.status[4][5] = 1;*/
-
-    /*imprime(&(mz.display), &(mz.status), n);
-    printf("\nGabarito:\n");
-    imprime(&(mz.gabarito), &(mz.status), n);*/
-
-
-    /*liberaMatrizes(&(mz.display), n);
-    liberaMatrizes(&(mz.gabarito), n);
-    liberaMatrizes(&(mz.status), n);
-
-    liberaVetores(&dicasV, n);
-    liberaVetores(&dicasH, n);*/
-    
+    menu(); //Menu principal do jogo
 
     return 0;
 }
 
 void inicializar(){
+    //Declarção de variáveis
     char nome[15], dificuldade;
-    int n=0, *dicasH, *dicasV, data=1;
-    char tamt;
-    matriz mz;
-    double tempoTotal = 0;
+    int n=0, *dicasH, *dicasV, flag=1; //n = dimensão da matriz, dicas armazenam as somas das linhas/colunas, flag = variável auxiliar que indica se há jogo a ser continuado
+    char tamt; //Tamanho do tabuleiro em formato de char
+    matriz mz; // Struct com as três matrizes principais do jogo
+    double tempoTotal = 0; // Tempo total de jogo
     
-
-
-
+    //Armazena a variável auxiliar indicando que agora existe um jogo iniciado que pode ser continuado
     FILE *fp = fopen("gamedata.dat", "wb");
-    fwrite(&data, sizeof(int), 1, fp);
+    fwrite(&flag, sizeof(int), 1, fp);
     fclose(fp);
 
 
-    printf("\ec\e[3J");
+    limpaTerminal();
     limpaBuffer();
-    printf("Digite o nome do jogador 1: ");
-    scanf("%s", nome);
-    limpaBuffer2();
-    printf("\nDigite o tamanho do tabuleiro (3 a 9): ");
-    scanf("%c", &tamt);
-    n = atoi(&tamt);
-    
 
+    printf("Digite o nome do jogador 1: "); //Entra o nome do jogador
+    scanf("%s", nome); //Até essa versão, o código não funciona com nomes compostos
+    limpaBuffer2();
+    printf("\nDigite o tamanho do tabuleiro (3 a 9): "); //Dimensão do tabuleiro lido em formato char
+    scanf("%c", &tamt); 
+    n = atoi(&tamt); //Transforma o char da dimensão em int
+    
+    //Garante que o tamanho entrado seja válido
     while(n<3 || n>9){
         if(n<3 || n>9){
             printf(RED("Tamanho inválido. Digite novamente: "));
@@ -104,6 +72,7 @@ void inicializar(){
 
     limpaBuffer2();
 
+    //Nos casos em que seja necessário, as condições abaixo pedem ao jogador para que faça a escolha da dificulde e armazena seu valor
     if(n > 6){
         while(1){
             printf("\nDigite o nível de dificuldade (Fácil, Médio ou Difícil): ");
@@ -120,61 +89,54 @@ void inicializar(){
             if(dificuldade == 'F' || dificuldade == 'f' || dificuldade == 'M' || dificuldade == 'm') break;
         else printf("\nOpção de dificuldade inválida. Digite novamente: ");
         }
-    }else dificuldade = 'F';
+    }else dificuldade = 'F'; //Tabuleiros com dimensão 3 e 4 sempre terão a dificuldade definida como fácil
     
     
     printf("\n\n");
 
-
+    //Todas as entradas realizadas, é feita a alocação dinâmica das matrizes e vetores de acordo com a dimensão definida
     alocaMemoria(&(mz.display), n);
     alocaMemoria(&(mz.gabarito), n);
     alocaMemoria(&(mz.status), n);
     alocaMemoriaDicas(&dicasH, n);
     alocaMemoriaDicas(&dicasV, n);
 
+    //O display é preenchido com valores aleatórios de acordo com as definições da dificuldade
     preencheDisplay(&(mz.display), n, dificuldade);
+    //O gabarito é preenchido com 0s e 1s de acordo com as definições da dificuldade
     preencheGabarito(&(mz.gabarito), n, dificuldade);
-    zeraStatus(&(mz.status), n);
+    //O tabuleiro status tem todas as suas posições definidas para -1
+    resetaStatus(&(mz.status), n);
 
+    //Preenche os dois vetores das dicas com suas somas, de acordo com a matriz gabarito
     preencheDicas(&(mz.display), &(mz.gabarito), &dicasV, n, "v\0");
     preencheDicas(&(mz.display), &(mz.gabarito), &dicasH, n, "h\0");
 
-
+    //Chama a função operador, que faz todo o controle dos comandos do jogo
     operador(nome, &mz, dicasH, dicasV, n, tempoTotal);
-    menu();
-    /*imprime(&(mz.display), &(mz.status), n);*/
-
-    liberaMatrizes(&(mz.display), n);
-    liberaMatrizes(&(mz.gabarito), n);
-    liberaMatrizes(&(mz.status), n);
-
-    liberaVetores(&dicasV, n);
-    liberaVetores(&dicasH, n);
-    printf("\n\nMemória Liberada\n");
-    exit(0);
 
 }
 
 void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double tempoTotal){
-    char leitura[50], comando[12], num[3], c;
-    int x=11, i, j, pos=0, auxpos=0, flag=1;
-    time_t tempoInicio, tempoFinal;
-    time(&tempoInicio);
+    char leitura[50], comando[12], num[3], c; //Leitura pega a frase inteira q for digitada no terminal, comando armazena o comando após isolado, num mantém a string do número antes de ser transformada em inteiro
+    int x=11, i, j, pos=0, auxpos=0, flag=1; //x armazena a posição alvo. É iniciada como 11 por motivos de validação.
+    //Pos e auxpos são usadas para a aritmética na manipulação das strings. Flag só permite uma dica por sessão
+    time_t tempoInicio, tempoFinal; //Variáveis de tempo de início e de fim da partida
+    time(&tempoInicio); //O primeiro tempo é pego, dando início à contagem
     limpaBuffer();
 
-    //criaRanking(nome, tempoTotal, n);
-
-    
 
     while(1){
-        //printf("\ec\e[3J");
+        limpaTerminal();
 
+        //A cada iteração do while é chamada a função de verificação de status, para avaliar se já pode ser declarada vitória ao jogador
         if(verificaStatus(mz->gabarito, mz->status, n)){   
-            time(&tempoFinal);
-            tempoTotal += difftime(tempoFinal, tempoInicio);
+            time(&tempoFinal); //Pega o tempo no momento da vitória
+            tempoTotal += difftime(tempoFinal, tempoInicio); //Calcula o tempo discorrido
 
-
+            //É chamada a tela de vitória, que imprime o nome do jogador e o tempo que ele levou para completar o jogo
             telaVitoria(nome, &(mz->display), &(mz->gabarito), dicasH, dicasV, n, tempoTotal);
+            //É feita a liberação das matrizes e vetores, e o jogo volta ao menu
             liberaMatrizes(&(mz->display), n);
             liberaMatrizes(&(mz->gabarito), n);
             liberaMatrizes(&(mz->status), n);
@@ -183,19 +145,19 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             menu();
         }
 
+        //Imprime um título
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
+        //Imprime a matriz com os valores de display
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
         printf("\n");
-        imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
-        //printf("\n");
-        imprime(&(mz->status), &(mz->status), &dicasH, &dicasV, n);
+
         limpaBuffer();
-        printf("\n%s, digite o comando: ", nome);
+        printf("\n%s, digite o comando: ", nome); 
 
         //Leitura do comando
         fgets(leitura, 50, stdin);
 
-        //aritmética para isolar o comando da posição, em caso dos comandos manter ou voltar
+        //aritmética para saber a posição de separação entre o comando e a posição, em caso dos comandos manter ou voltar
         int tam = strlen(leitura);
         for(int i=0; i<tam; i++){
             if(leitura[i]==' '){
@@ -210,12 +172,13 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
         comando[pos] = '\0';
 
         //no caso dos comandos manter ou remover, a posição é isolada e transformada em um inteiro
-        if(!strcmp(comando, "manter") || (!strcmp(comando, "remover"))){
+        if(!strcmp(comando, "manter") || (!strcmp(comando, "remover")) || !strcmp(comando, "MANTER") || !strcmp(comando, "REMOVER")){
             for(int j=0; j<2; j++){
                 pos++;
                 num[j] = leitura[pos];
             }
             num[2] = '\0';
+            //O inteiro é então dividido em duas partes (linha e coluna)
             x = atoi(num);
             j = x%10;
             i = x/10;   
@@ -228,8 +191,9 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             continue;
         }
 
+        //No caso do comando "salvar" é separado agora o nome do arquivo alvo
         char nomearquivo[25] = "a";
-        if(!strcmp(comando, "salvar")){
+        if(!strcmp(comando, "salvar") || !strcmp(comando, "SALVAR")){
                 auxpos=0;
                 while(pos < tam){
                     nomearquivo[auxpos] = leitura[pos+1];
@@ -240,20 +204,18 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
  
             }
             
-        
-        
-
-
-        
-    
-        
-        if(!strcmp(comando, "manter")){
+        //Aqui são chamadas as funções de operação separadamente
+        if(!strcmp(comando, "manter") || !strcmp(comando, "MANTER")){
             mudaStatus(&(mz->status), i-1, j-1, 1);
-        }else if(!strcmp(comando, "remover")){
+
+        }else if(!strcmp(comando, "remover") || !strcmp(comando, "REMOVER")){
             mudaStatus(&(mz->status), i-1, j-1, 0);
-        }else if(!strcmp(comando, "voltar")){
+
+        }else if(!strcmp(comando, "voltar") || !strcmp(comando, "VOLTAR")){
+            //Ao voltar ao menu, o tempo total já discorrido é armazenado no arquivo temporário
             time(&tempoFinal);
             tempoTotal += difftime(tempoFinal, tempoInicio);
+            //O arquivo é salvo em "temporario.txt", e as matrizes e vetores são liberados
             salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
             liberaMatrizes(&(mz->display), n);
             liberaMatrizes(&(mz->gabarito), n);
@@ -261,84 +223,89 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             liberaVetores(&dicasH, n);
             liberaVetores(&dicasV, n);
             menu();
-            return;
-        }else if(!strcmp(comando, "salvar")){
 
+        }else if(!strcmp(comando, "salvar") || !strcmp(comando, "SALVAR")){
+            //É verificado o formato do arquivo definido como arquivo final. Caso seja inválido, deve ser entrado novamente
             while(!verificaFormato(nomearquivo)){
                 printf("\nNome de arquivo inválido. Entre o nome do arquivo novamente: ");
                 limpaBuffer();
                 scanf("%s", nomearquivo);
             }
 
+            //O tempo já discorrido é captado e armazenado juntamente ao arquivo
             time(&tempoFinal);
             tempoTotal += difftime(tempoFinal, tempoInicio);
             salvaJogo(nome, nomearquivo, &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
-        }else if(!strcmp(comando, "dica")){
+
+        }else if(!strcmp(comando, "dica") || !strcmp(comando, "DICA")){
+            //Chama a função que dá uma dica ao jogador. Só pode ser usada uma vez por sessão
             dica(&(mz->gabarito), &(mz->status), n, flag);
             flag=0;
-        }else if(!strcmp(comando, "resolver")){
+
+        }else if(!strcmp(comando, "resolver") || !strcmp(comando, "RESOLVER")){
+            //Chama a função que resolve o código
             resolve(&(mz->gabarito), &(mz->status), n);
-            printf("\nEntrou em resolver :) \n");
         }
     }
 
 }
 
 void menu(){
-    int flag;
-    char nomearquivo[25], op;
+    char nomearquivo[25], op; //a variável op armazena o valor da operação a ser realizada
+
+    int flag; //Variável auxiliar para saber se existe jogo a ser continuado
     FILE *fp = fopen("gamedata.dat", "rb");
-    
-    
-    /*FILE *ini = fopen("sumplete.ini", "w");
-
-    for(int i=3; i<10; i++)
-        fprintf(ini, "size = %d\n\n", i);*/
-    
-    //leRanking();
-
     fread(&flag, sizeof(int), 1, fp);
     fclose(fp);
 
     limpaTerminal();
     printf(BLUE("+ o + !!Bem vindo ao jogo SUMPLETE!! o + o "));
 
+    //São impressas as opções de ações a serem realizadas
     printf("\n\n0. Sair do jogo\n1. Começar um novo jogo\n2. Continuar um jogo salvo em arquivo\n3. Continuar o jogo atual\n4. Exibir o ranking\nDurante o jogo, digite 'voltar' para retonar a esse menu.\n");
     printf("\n\nEscolha uma opção: ");
 
-    
+    //leitura do operador
     scanf("%c", &op);
 
-    while(1){
+    while(op!='0'){
         switch(op){
-        case '0':
+        case '0': //Encerra o programa
             exit(0);
-        case '1':
+        case '1': //Inicializa um novo jogo
             inicializar();
             flag = 1;
             break;
-        case '2':
+        case '2': //Carrega um jogo salvo
             limpaBuffer();
             printf("\nEntre o nome do arquivo: ");
             fgets(nomearquivo, 25, stdin);
             nomearquivo[strlen(nomearquivo)-1] = '\0';
             carregaSalvo(nomearquivo);
             break;
-        case '3':
+        case '3': //Continua o jogo em andamento, caso exista um
             if(flag){
                 carregaSalvo("temporario.txt");
                 break;
             }else{
+                // Caso não exista jogo em andamento, o jogador é avisado disso
                 printf("\nVocê ainda não iniciou um jogo.\nEscolha novamente: ");
                 sleep(2);
                 menu();
                 break;
             }   
-        case '4':
+        case '4': //Imprime o ranking
+            Ranking rk = leRanking();
+            imprimeRanking(rk, 't', 3);
+            //leitura de novo operador para sair do loop
+            limpaBuffer2();
+            printf("\n\nEscolha uma opção: ");
+            //leitura do operador
+            scanf("%c", &op);
             break;
-        default:
+        default: //Caso o comando seja inválido, é requisitado novamente
             limpaBuffer();
-            printf("\rComando não reconhecido. Digite novamente: ");
+            printf("Comando não reconhecido. Digite novamente: ");
             scanf("%c", &op);
             break;
         }    
@@ -350,8 +317,6 @@ void menu(){
 
 
 void carregaSalvo(char nomearquivo[]){
-    // *Nota: pode não ser interessante tratar o dado "nomearquivo" aqui dentro
-    // *Nota: não tenha medo de expandir o código em prol da legibilidade; este é um digno objetivo junto à resolução do seu problema a ser alcançado
 
     char arquivo[15], nome[15];
     int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q;
@@ -370,14 +335,13 @@ void carregaSalvo(char nomearquivo[]){
     // n
     fscanf(fp, "%d", &n);
 
-    // "matriz" é um tipo com matrizes dentro? Pode levar à confusão ksksk
     alocaMemoria(&(mz.display), n);
     alocaMemoria(&(mz.gabarito), n);
     alocaMemoria(&(mz.status), n);
     alocaMemoriaDicas(&dicasH, n);
     alocaMemoriaDicas(&dicasV, n);
 
-    zeraStatus(&(mz.status), n);
+    resetaStatus(&(mz.status), n);
 
     // Matriz
     for(int i=0; i<n; i++){

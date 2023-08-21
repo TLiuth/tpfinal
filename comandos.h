@@ -32,7 +32,7 @@ void imprime(int ***tabela, int ***status, int **dicasH, int **dicasV, int n);
 
 void preencheGabarito(int ***tabela, int n, char dificuldade);
 
-void zeraStatus(int ***tabela, int n);
+void resetaStatus(int ***tabela, int n);
 
 void alocaMemoriaDicas(int **vetor, int n);
 
@@ -60,11 +60,19 @@ void resolve(int ***gabarito, int ***status, int n);
 
 int verificaStatus(int **gabarito, int **status, int n);
 
+int verificaVetor(int vetor[], int **tabela, int **status, int n, int i);
+
+int verificaVetorH(int vetor[], int **tabela, int **status, int n, int i);
+
 int verificaFormato(char nome[15]);
 
 void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double);
 
-void imprimeRanking(Ranking rk);
+Ranking atualizaRanking(double tempo, char nome[TAMNOME], int);
+
+Ranking ordenaRanking(Ranking rk);
+
+void imprimeRanking(Ranking rk, char, int);
 
 Ranking leRanking();
 
