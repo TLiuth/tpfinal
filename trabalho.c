@@ -149,6 +149,8 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
         //Imprime a matriz com os valores de display
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
+        printf("\n\n");
+        //imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
         printf("\n");
 
         limpaBuffer();
@@ -215,8 +217,10 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             //Ao voltar ao menu, o tempo total já discorrido é armazenado no arquivo temporário
             time(&tempoFinal);
             tempoTotal += difftime(tempoFinal, tempoInicio);
+            printf("\nFLAG 1 VOLTAR");
             //O arquivo é salvo em "temporario.txt", e as matrizes e vetores são liberados
             salvaJogo(nome, "temporario.txt", &(mz->display), &(mz->gabarito), &(mz->status), &dicasH, &dicasV, n, tempoTotal);
+            printf("\nFLAG 2 VOLTAR");
             liberaMatrizes(&(mz->display), n);
             liberaMatrizes(&(mz->gabarito), n);
             liberaMatrizes(&(mz->status), n);
@@ -323,8 +327,10 @@ void carregaSalvo(char nomearquivo[]){
     matriz mz;
     double tempoTotal;
 
-    FILE *fp;
+    FILE *fp, *bf;
     fp = fopen(nomearquivo, "r");
+
+    
 
     if(fp==NULL){
         printf("Arquivo inexistente.\n");
@@ -342,6 +348,22 @@ void carregaSalvo(char nomearquivo[]){
     alocaMemoriaDicas(&dicasV, n);
 
     resetaStatus(&(mz.status), n);
+
+    //É criado um arquivo auxiliar para carregar o gabarito do formato binário
+    char nomebinario[25];
+    strcpy(nomebinario, nomearquivo);
+    nomebinario[strlen(nomearquivo)-3] = '\0';
+    strcat(nomebinario, ".dat\0");
+
+    bf = fopen(nomebinario, "rb");
+
+    //A matriz gabarito é carregada do formato binário
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            fread(&(mz.gabarito)[i][j], sizeof(int), 1, bf);
+        }
+    }
+    fclose(bf);
 
     // Matriz
     for(int i=0; i<n; i++){
@@ -369,11 +391,6 @@ void carregaSalvo(char nomearquivo[]){
     }
 
     fscanf(fp, "%s", nome);
-
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
-            fscanf(fp, "%d", &mz.gabarito[i][j]);
-    }
 
     fscanf(fp, "%lf", &tempoTotal);
 

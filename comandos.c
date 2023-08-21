@@ -236,59 +236,76 @@ void mudaStatus(int ***tabela, int i, int j, int operacao){
 }
 
 void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n, double tempoTotal){
-    int marcados=0, removidos=0;
-    FILE *fp;
+    int mantidos=0, removidos=0;
+    FILE *fp, *bf;
+    printf("\nFLAG 1");
     fp = fopen(nomearquivo, "w");
 
+    printf("\nFLAG 2");
+    
+    //É criado um arquivo auxiliar para salvar o gabarito em formato binário
+    char nomebinario[25];
+    strcpy(nomebinario, nomearquivo);
+    nomebinario[strlen(nomearquivo)-4] = '\0';
+    strcat(nomebinario, ".dat\0");
+
+    bf = fopen(nomebinario, "wb");
+
+    printf("\nFLAG 3");
+
+    //A matriz gabarito é salva em formato binário
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            fwrite(&(*gabarito)[i][j], sizeof(int), 1, bf);
+        }
+    }
+    fclose(bf);
+
+    printf("\nFLAG 4");
 
     
-
-
-    fprintf(fp, "%d\n", n);
+    fprintf(fp, "%d\n", n); //Dimensão n
+    //Matriz display
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
             fprintf(fp, "%d ", (*display)[i][j]);
         fprintf(fp, "\n");
     }
 
+    //Somas Verticais e Horizontais
     for(int i=0; i<n; i++) fprintf(fp,"%d ", (*dicasV)[i]);
     fprintf(fp, "\n");
     for(int i=0; i<n; i++) fprintf(fp, "%d ", (*dicasH)[i]);
     fprintf(fp, "\n");
 
 
-
+    //Calcula quantas posições foram mantidas e removidas
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
-            if((*status)[i][j] == 1) marcados++;
+            if((*status)[i][j] == 1) mantidos++;
             if((*status)[i][j] == 0) removidos++;
         }
             
     }
-    fprintf(fp, "%d\n", marcados);
 
-
+    //Imprime quantos foram mantidos e suas respectivas coordenadas
+    fprintf(fp, "%d\n", mantidos);
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
             if((*status)[i][j] == 1) fprintf(fp, "%d %d\n", i, j);
     }
 
+    //Imprime quantos foram removidos e suas respectivas coordenadas
     fprintf(fp, "%d\n", removidos);
-
-
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
             if((*status)[i][j] == 0) fprintf(fp, "%d %d\n", i, j);
     }
 
+    //Imprime o nome do jogador
     fprintf(fp, "%s\n", nome);
 
-    for(int i=0; i<n; i++){
-        for(int j=0; j<n; j++)
-            fprintf(fp, "%d ", (*gabarito)[i][j]);
-        fprintf(fp, "\n");
-    }
-
+    //Imprime o tempo total do jogador
     fprintf(fp, "%.0lf", tempoTotal);
     
 
@@ -431,7 +448,7 @@ void imprimeRanking(Ranking rk, char op, int n){
     char flag[10] = "";
     int tam;
 
-    limpaBuffer2();
+    //limpaBuffer2();
 
     
         if(op=='t'){
@@ -444,7 +461,7 @@ void imprimeRanking(Ranking rk, char op, int n){
                 }
             }
 
-            while(strcmp(flag, "voltar") != 0){
+            /*while(strcmp(flag, "voltar") != 0){
                 printf("\nDigite 'voltar' para retornar ao menu principal: ");
                 fgets(flag, 10, stdin);
                 tam = strlen(flag);
@@ -452,7 +469,7 @@ void imprimeRanking(Ranking rk, char op, int n){
                 printf("|%s|", flag);
             }
         
-        if(!strcmp(flag, "voltar")) return;
+        if(!strcmp(flag, "voltar")) return;*/
 
         }else{
             FILE *fp = fopen("sumplete.ini", "w");
