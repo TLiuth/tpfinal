@@ -166,8 +166,6 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
         printf(BOLD(BLUE("+ o + !!SUMPLETE!! o + o \n")));
         //Imprime a matriz com os valores de display
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
-        printf("\n\n");
-        imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
         printf("\n");
 
         limpaBuffer();
