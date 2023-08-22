@@ -2,22 +2,23 @@
 #define COMANDOS_H
 #define MAXJOGADORES 5
 #define TAMNOME 64
-#define QTDGAPS 7
+#define QTDGAPS 7 //Quantidade de dimensões
 #define TAMPALAVRA 50
 
 typedef struct {
-    char nome[TAMNOME];
-    double tempo;
+    char nome[TAMNOME]; //Nome do jogador
+    double tempo; //Tempo do jogador
 } Jogador;
 
 typedef struct {
-    int tam;
-    int qtd;
+    int tam; //Dimensão
+    int qtd; //Quantidade de jogadores registrados nesse tamanho
     Jogador jogadores[MAXJOGADORES];
 }SizeGap;
 
+//Struct que armazena o ranking
 typedef struct{
-    SizeGap gap[QTDGAPS];
+    SizeGap gap[QTDGAPS]; //Quantidade de dimensões
 }Ranking;
 
 int teste();
@@ -52,8 +53,6 @@ void titulo();
 
 void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n, double);
 
-//void carregaSalvo(char nomearquivo[]);
-
 void dica(int ***gabarito, int ***status, int n, int flag);
 
 void resolve(int ***gabarito, int ***status, int n);
@@ -75,7 +74,5 @@ Ranking ordenaRanking(Ranking rk);
 void imprimeRanking(Ranking rk, char, int);
 
 Ranking leRanking();
-
-void printInputBuffer(); // debugar
 
 #endif //COMANDOS_H

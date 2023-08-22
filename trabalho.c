@@ -272,7 +272,7 @@ void menu(){
     //leitura do operador
     scanf("%c", &op);
 
-    while(op!='0'){
+    while(1){
         switch(op){
         case '0': //Encerra o programa
             exit(0);
@@ -319,11 +319,11 @@ void menu(){
 
 }
 
-
+//Função para carregar jogo salvo em arquivo. É chamada tanto para jogos deliberadamente salvos pelo jogador, quanto para resumir jogos em andamento
 void carregaSalvo(char nomearquivo[]){
 
     char arquivo[15], nome[15];
-    int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q;
+    int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q; //p e q leem e armazenam coordenadas
     matriz mz;
     double tempoTotal;
 
@@ -331,7 +331,7 @@ void carregaSalvo(char nomearquivo[]){
     fp = fopen(nomearquivo, "r");
 
     
-
+    //Caso não exista o arquivo destino, a função retorna ao menu
     if(fp==NULL){
         printf("Arquivo inexistente.\n");
         sleep(2);
@@ -352,7 +352,7 @@ void carregaSalvo(char nomearquivo[]){
     //É criado um arquivo auxiliar para carregar o gabarito do formato binário
     char nomebinario[25];
     strcpy(nomebinario, nomearquivo);
-    nomebinario[strlen(nomearquivo)-3] = '\0';
+    nomebinario[strlen(nomearquivo)-4] = '\0';
     strcat(nomebinario, ".dat\0");
 
     bf = fopen(nomebinario, "rb");
@@ -377,25 +377,29 @@ void carregaSalvo(char nomearquivo[]){
     // Dicas (horizontal)
     for(int i=0; i<n; i++) fscanf(fp,"%d", &dicasH[i]);
 
+    //Número e coordenadas das posições marcadas, salvas em p e q
     fscanf(fp, "%d", &marcados);
-
     for (int i=0; i<marcados; i++){
         fscanf(fp, "%d%d", &p, &q);
         mz.status[p][q] = 1;
     }
-
+    
+    //Número e coordendas das posições removidas
     fscanf(fp, "%d", &removidos);
     for(int i=0; i<removidos; i++){
         fscanf(fp, "%d%d", &p, &q);
         mz.status[p][q] = 0;
     }
 
+    //Nome do jogador
     fscanf(fp, "%s", nome);
 
+    //Tempo total já discorrido
     fscanf(fp, "%lf", &tempoTotal);
 
     fclose(fp);
 
+    //Chama a função operador() para resumir o jogo
     operador(nome, &mz, dicasH, dicasV, n, tempoTotal);
 
 }
