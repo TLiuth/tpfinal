@@ -1,3 +1,9 @@
+/*
+Trabalho Final Introdução à Programação 2023/1
+Professor: Puca Huachi V. Penna
+Aluno: Thiago Ayolphi Liuth
+Matrícula: 2314005
+*/
 // cores e formato de texto
 #define ANSI_RESET            "\x1b[0m"  // desativa os efeitos anteriores
 #define ANSI_BOLD             "\x1b[1m"  // coloca o texto em negrito

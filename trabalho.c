@@ -1,4 +1,9 @@
-//Thiago Ayolphi Liuth 2314005
+/*
+Trabalho Final Introdução à Programação 2023/1
+Professor: Puca Huachi V. Penna
+Aluno: Thiago Ayolphi Liuth
+Matrícula: 2314005
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +43,7 @@ int main(){
 
 void inicializar(){
     //Declarção de variáveis
-    char nome[15], dificuldade;
+    char nome[TAMNOME], dificuldade;
     int n=0, *dicasH, *dicasV, flag=1; //n = dimensão da matriz, dicas armazenam as somas das linhas/colunas, flag = variável auxiliar que indica se há jogo a ser continuado
     char tamt; //Tamanho do tabuleiro em formato de char
     matriz mz; // Struct com as três matrizes principais do jogo
@@ -50,12 +55,18 @@ void inicializar(){
     fclose(fp);
 
 
-    limpaTerminal();
-    limpaBuffer();
 
     printf("Digite o nome do jogador 1: "); //Entra o nome do jogador
-    scanf("%s", nome); //Até essa versão, o código não funciona com nomes compostos
-    limpaBuffer2();
+    fgets(nome, TAMNOME, stdin); //Leitura do nome do jogador
+
+    //O nome deve ser composto por no mínimo um caracter válido. Um espaço ou quebra de linha não são válidos
+    while(nome[0] == '\n' || nome[0] == ' '){
+        printf("\nEsse nome não é válido. Tente outro nome: ");
+        fgets(nome, TAMNOME, stdin);
+    }
+    nome[strlen(nome)-1] = '\0';
+
+
     printf("\nDigite o tamanho do tabuleiro (3 a 9): "); //Dimensão do tabuleiro lido em formato char
     scanf("%c", &tamt); 
     n = atoi(&tamt); //Transforma o char da dimensão em int
@@ -63,8 +74,8 @@ void inicializar(){
     //Garante que o tamanho entrado seja válido
     while(n<3 || n>9){
         if(n<3 || n>9){
-            printf(RED("Tamanho inválido. Digite novamente: "));
             limpaBuffer2();
+            printf(RED("Tamanho inválido. Digite novamente: "));
             scanf("%c", &tamt);
             n = atoi(&tamt);
         }
@@ -79,7 +90,10 @@ void inicializar(){
             scanf("%c", &dificuldade);
             getchar();
             if(dificuldade == 'F' || dificuldade == 'f' || dificuldade == 'M' || dificuldade == 'm' || dificuldade == 'D' || dificuldade == 'd') break;
-        else printf("\nOpção de dificuldade inválida. Digite novamente: ");
+            else{
+                printf("\nOpção de dificuldade inválida.");
+                limpaBuffer2();;
+            }
         }
     }else if(n>4){
         while(1){
@@ -87,7 +101,10 @@ void inicializar(){
             scanf("%c", &dificuldade);
             getchar();
             if(dificuldade == 'F' || dificuldade == 'f' || dificuldade == 'M' || dificuldade == 'm') break;
-        else printf("\nOpção de dificuldade inválida. Digite novamente: ");
+            else{
+                printf("\nOpção de dificuldade inválida.");
+                limpaBuffer2();
+            }
         }
     }else dificuldade = 'F'; //Tabuleiros com dimensão 3 e 4 sempre terão a dificuldade definida como fácil
     
@@ -118,7 +135,7 @@ void inicializar(){
 }
 
 void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double tempoTotal){
-    char leitura[50], comando[12], num[3], c; //Leitura pega a frase inteira q for digitada no terminal, comando armazena o comando após isolado, num mantém a string do número antes de ser transformada em inteiro
+    char leitura[50], comando[12], num[3]; //Leitura pega a frase inteira q for digitada no terminal, comando armazena o comando após isolado, num mantém a string do número antes de ser transformada em inteiro
     int x=11, i, j, pos=0, auxpos=0, flag=1; //x armazena a posição alvo. É iniciada como 11 por motivos de validação.
     //Pos e auxpos são usadas para a aritmética na manipulação das strings. Flag só permite uma dica por sessão
     time_t tempoInicio, tempoFinal; //Variáveis de tempo de início e de fim da partida
@@ -150,7 +167,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
         //Imprime a matriz com os valores de display
         imprime(&(mz->display), &(mz->status), &dicasH, &dicasV, n);
         printf("\n\n");
-        //imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
+        imprime(&(mz->gabarito), &(mz->status), &dicasH, &dicasV, n);
         printf("\n");
 
         limpaBuffer();
@@ -178,6 +195,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
             for(int j=0; j<2; j++){
                 pos++;
                 num[j] = leitura[pos];
+                printf("%s", num);
             }
             num[2] = '\0';
             //O inteiro é então dividido em duas partes (linha e coluna)
@@ -190,11 +208,12 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
         if(x < 11 || x>((10*n)+n)){
             printf(BOLD(RED("\nPosição inválida.\n")));
             sleep(2);
+            operador(nome, mz, dicasH, dicasV, n, tempoTotal);
             continue;
         }
 
         //No caso do comando "salvar" é separado agora o nome do arquivo alvo
-        char nomearquivo[25] = "a";
+        char nomearquivo[TAMNOME] = "a";
         if(!strcmp(comando, "salvar") || !strcmp(comando, "SALVAR")){
                 auxpos=0;
                 while(pos < tam){
@@ -255,7 +274,7 @@ void operador(char nome[], matriz *mz, int *dicasH, int *dicasV, int n, double t
 }
 
 void menu(){
-    char nomearquivo[25], op; //a variável op armazena o valor da operação a ser realizada
+    char nomearquivo[TAMNOME], op; //a variável op armazena o valor da operação a ser realizada
 
     int flag; //Variável auxiliar para saber se existe jogo a ser continuado
     FILE *fp = fopen("gamedata.dat", "rb");
@@ -272,19 +291,23 @@ void menu(){
     //leitura do operador
     scanf("%c", &op);
 
+    
+
     while(1){
         switch(op){
         case '0': //Encerra o programa
             exit(0);
         case '1': //Inicializa um novo jogo
+            limpaBuffer2();
             inicializar();
             flag = 1;
             break;
         case '2': //Carrega um jogo salvo
-            limpaBuffer();
+            limpaBuffer2();
             printf("\nEntre o nome do arquivo: ");
-            fgets(nomearquivo, 25, stdin);
+            fgets(nomearquivo, TAMNOME, stdin);
             nomearquivo[strlen(nomearquivo)-1] = '\0';
+            //limpaBuffer2();
             carregaSalvo(nomearquivo);
             break;
         case '3': //Continua o jogo em andamento, caso exista um
@@ -308,7 +331,7 @@ void menu(){
             scanf("%c", &op);
             break;
         default: //Caso o comando seja inválido, é requisitado novamente
-            limpaBuffer();
+            limpaBuffer2();
             printf("Comando não reconhecido. Digite novamente: ");
             scanf("%c", &op);
             break;
@@ -322,19 +345,18 @@ void menu(){
 //Função para carregar jogo salvo em arquivo. É chamada tanto para jogos deliberadamente salvos pelo jogador, quanto para resumir jogos em andamento
 void carregaSalvo(char nomearquivo[]){
 
-    char arquivo[15], nome[15];
+    char nome[TAMNOME];
     int n=0, *dicasH, *dicasV, marcados, removidos=0, p, q; //p e q leem e armazenam coordenadas
     matriz mz;
     double tempoTotal;
 
-    FILE *fp, *bf;
+    FILE *fp;
     fp = fopen(nomearquivo, "r");
 
     
     //Caso não exista o arquivo destino, a função retorna ao menu
     if(fp==NULL){
-        printf("Arquivo inexistente.\n");
-        sleep(2);
+        printf("\nArquivo inexistente.\n");
         menu();
     }
 
@@ -348,22 +370,6 @@ void carregaSalvo(char nomearquivo[]){
     alocaMemoriaDicas(&dicasV, n);
 
     resetaStatus(&(mz.status), n);
-
-    //É criado um arquivo auxiliar para carregar o gabarito do formato binário
-    char nomebinario[25];
-    strcpy(nomebinario, nomearquivo);
-    nomebinario[strlen(nomearquivo)-4] = '\0';
-    strcat(nomebinario, ".dat\0");
-
-    bf = fopen(nomebinario, "rb");
-
-    //A matriz gabarito é carregada do formato binário
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            fread(&(mz.gabarito)[i][j], sizeof(int), 1, bf);
-        }
-    }
-    fclose(bf);
 
     // Matriz
     for(int i=0; i<n; i++){
@@ -391,8 +397,16 @@ void carregaSalvo(char nomearquivo[]){
         mz.status[p][q] = 0;
     }
 
+    //Carrega o gabarito
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            fscanf(fp, "%d", &mz.gabarito[i][j]);
+    }
+
     //Nome do jogador
-    fscanf(fp, "%s", nome);
+    fgets(nome, TAMNOME, fp);
+    fgets(nome, TAMNOME, fp);
+    nome[strlen(nome)-1] = '\0';
 
     //Tempo total já discorrido
     fscanf(fp, "%lf", &tempoTotal);

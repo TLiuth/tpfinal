@@ -1,3 +1,9 @@
+/*
+Trabalho Final Introdução à Programação 2023/1
+Professor: Puca Huachi V. Penna
+Aluno: Thiago Ayolphi Liuth
+Matrícula: 2314005
+*/
 #include "comandos.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -213,8 +219,9 @@ void limpaBuffer(){
 
 //Realiza a limpeza do buffer de outra maneira
 void limpaBuffer2(){
+    ungetc('+', stdin);
     int c;
-    while((c = getchar()) != '\n' && c != EOF);
+    while((c = fgetc(stdin)) != EOF && c != '\n');
 }
 
 //Atualiza o status de acordo com o comando decidido no Operador()
@@ -234,24 +241,9 @@ void mudaStatus(int ***tabela, int i, int j, int operacao){
 //Função para criar um arquivo .txt com os dados do jogo
 void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito, int ***status, int **dicasH, int **dicasV, int n, double tempoTotal){
     int mantidos=0, removidos=0;
-    FILE *fp, *bf;
+    FILE *fp;
     fp = fopen(nomearquivo, "w");
 
-    //É criado um arquivo auxiliar para salvar o gabarito em formato binário
-    char nomebinario[25];
-    strcpy(nomebinario, nomearquivo);
-    nomebinario[strlen(nomearquivo)-4] = '\0';
-    strcat(nomebinario, ".dat\0");
-
-    bf = fopen(nomebinario, "wb");
-
-    //A matriz gabarito é salva em formato binário
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            fwrite(&(*gabarito)[i][j], sizeof(int), 1, bf);
-        }
-    }
-    fclose(bf);
     
     fprintf(fp, "%d\n", n); //Dimensão n
     //Matriz display
@@ -289,6 +281,13 @@ void salvaJogo(char nome[], char nomearquivo[], int ***display, int ***gabarito,
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
             if((*status)[i][j] == 0) fprintf(fp, "%d %d\n", i, j);
+    }
+
+    //Imprime o gabarito
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++)
+            fprintf(fp, "%d ", (*gabarito)[i][j]);
+        fprintf(fp, "\n");
     }
 
     //Imprime o nome do jogador
@@ -422,8 +421,6 @@ Ranking atualizaRanking(double tempo, char nome[TAMNOME], int n){
 
 //Imprime o ranking no terminal ou no arquivo
 void imprimeRanking(Ranking rk, char op, int n){
-    char flag[10] = "";
-    int tam;
 
         //Impressão no terminal
         if(op=='t'){
@@ -460,11 +457,9 @@ Ranking leRanking(){
     FILE *fp;
     Ranking rk;
     int size;
-    char palavra[TAMPALAVRA], palavraauxiliar[TAMPALAVRA];
+    char palavra[TAMPALAVRA];
 
-    if((fp = fopen("sumplete.ini", "r"))==NULL){
-        fp = fopen("sumplete.ini", "w");
-    }
+    
 
     //Zera as posições da struct onde será armazenado o ranking
     for (int i = 0; i < 7; i++) {
@@ -472,8 +467,16 @@ Ranking leRanking(){
         rk.gap[i].tam = i + 3;
     }
 
+    //Garanta que exista um arquivo chamado sumplete.ini
+    if((fp = fopen("sumplete.ini", "r"))==NULL){
+        fp = fopen("sumplete.ini", "w");
+        printf("\nNão há ranking a ser exibido.");
+        return rk;
+    }
+
     //Começa a leitura
     fscanf(fp, "%s", palavra);
+
 
     //O primeiro for percorre cada categoria, caso exista
     for(int i=0; i<7 || !feof(fp); i++){
@@ -510,7 +513,7 @@ Ranking leRanking(){
 }
 
 //Verifica se o formato de arquivo de salvamento é válido
-int verificaFormato(char nome[25]){
+int verificaFormato(char nome[TAMNOME]){
     char aux[5];
     int tam, cont=3;
     tam = strlen(nome);
@@ -529,7 +532,9 @@ int verificaFormato(char nome[25]){
 
 //Título do jogo
 void titulo(){
+    int iteracoes = 1;
 
+    //Imprime um título
     printf(MAGENTA(
          "  ███████╗██╗   ██╗███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗\n"
          "  ██╔════╝██║   ██║████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝\n"
@@ -537,5 +542,15 @@ void titulo(){
          "  ╚════██║██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  \n"
          "  ███████║╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗\n\n")); 
 
-         sleep(3);
+    //Simula uma barra de carregamento, reiniciando do início da linha a cada iteração
+    while(iteracoes < 30){
+        fflush(stdout);
+        printf("\r     ");
+            for(int i=0; i<iteracoes; i++){
+            printf("██");
+            }
+        usleep(30000);
+        iteracoes++;
+    }
+    printf("\x1b[0m");
 }

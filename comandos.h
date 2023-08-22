@@ -1,3 +1,9 @@
+/*
+Trabalho Final Introdução à Programação 2023/1
+Professor: Puca Huachi V. Penna
+Aluno: Thiago Ayolphi Liuth
+Matrícula: 2314005
+*/
 #ifndef COMANDOS_H //evita múltiplas inclusões
 #define COMANDOS_H
 #define MAXJOGADORES 5
@@ -63,7 +69,7 @@ int verificaVetor(int vetor[], int **tabela, int **status, int n, int i);
 
 int verificaVetorH(int vetor[], int **tabela, int **status, int n, int i);
 
-int verificaFormato(char nome[15]);
+int verificaFormato(char nome[TAMNOME]);
 
 void telaVitoria(char nome[], int ***tabela, int ***gabarito, int *dicasH, int *dicasV, int n, double);
 
